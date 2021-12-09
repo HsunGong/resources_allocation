@@ -2,7 +2,7 @@ import argparse
 import sys, os
 from typing import NamedTuple
 import numpy as np
-
+import random
 
 def list2int(l):
     return [int(i) for i in l]
@@ -140,7 +140,20 @@ class ResourceScheduler:
         for host in self.hosts:
             host.init()
 
-    def schedule(self):
+    def schedule(self, type="rand"):
+        if "rand":
+            self.rand_schedule()
+        else:
+            self.greedy_schedule()
+    def greedy_schedule(self):
+        ## Only task 1 is supported
+        assert self.taskID == 1
+
+        # sort by finish time
+        job_parallel = []
+        job_sequential = []
+
+    def rand_schedule(self):
         # naive
         for job in self.jobs:
             hid = random.randint(0, self.numHost-1)
@@ -151,9 +164,9 @@ class ResourceScheduler:
             for block in job.blocks:
                 # update start/end
                 block.start_time = core.finish_time
-                block.end_time = core.finish_time + block.data
+                block.end_time = core.finish_time + block.data / job.speed
                 # update core start/end
-                core.add_block(block, block.data)
+                core.add_block(block, block.data / job.speed)
             # update job finish
             job.finish_time = core.finish_time
             # update host finish
@@ -184,55 +197,6 @@ class ResourceScheduler:
         print("The total response time:", sum(job.finish_time for job in self.jobs))
 
 
-import random
-
-
-def generator(rs: ResourceScheduler, task):
-    rs.numJob = 15
-    rs.alpha = 0.08
-    if task == 2:
-        rs.numHost = 5
-        rs.St = 500
-    else:
-        rs.numHost = 1
-        rs.St = None
-
-    core_range = [i for i in range(3, 20)]
-    block_range = [i for i in range(20, 80)]
-    size_range = [i for i in range(50, 200)]
-    speed_range = [i for i in range(20, 80)]
-
-    hosts = []
-    for idx, num_core in enumerate(random.choices(core_range, k=rs.numHost)):
-        hosts.append(Host(hostid=idx, num_core=num_core))
-    rs.hosts = hosts
-
-    jobs = []
-    for idx, num_block in enumerate(random.choices(core_range, k=rs.numJob)):
-        jobs.append(Job(jobid=idx, num_block=num_block))
-    rs.jobs = jobs
-    for idx, speed in enumerate(random.choices(speed_range, k=rs.numJob)):
-        rs.jobs[idx].speed = speed
-
-    job_blocks = []
-    for job_idx in range(rs.numJob):
-        cur_job = rs.jobs[job_idx]
-        cur_job.blocks = [] # deinit all blocks
-        blocks = []
-        for block_idx, data in enumerate(list2int(random.choices(block_range, k=cur_job.num_block))):
-            blocks.append(data)
-        job_blocks.append(blocks)
-
-    # Job-> block number-> block location (host number)
-    for job_idx in range(rs.numJob):
-        cur_job = rs.jobs[job_idx]
-        blocks = job_blocks[job_idx]
-        for block_idx, host in enumerate(list2int(random.choices(size_range, k=cur_job.num_block))):
-            cur_job.add_block(data=blocks[block_idx], host=host)
-
-    rs.init_task()
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -248,6 +212,7 @@ if __name__ == "__main__":
 
     rs = ResourceScheduler(args.task, file_in)
 
+    # from utils import generator
     # generator(rs, args.task)
 
     rs.schedule()
