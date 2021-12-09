@@ -17,3 +17,5 @@ cmake-build-debug/
 Testing/
 *.cbp
 build/
+
+*__pycache__

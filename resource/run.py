@@ -3,6 +3,7 @@ import sys, os
 from typing import NamedTuple
 import numpy as np
 import random
+from plot import plot
 
 def list2int(l):
     return [int(i) for i in l]
@@ -163,6 +164,8 @@ class ResourceScheduler:
 
             for block in job.blocks:
                 # update start/end
+                block.hostid = hid
+                block.coreid = cid
                 block.start_time = core.finish_time
                 block.end_time = core.finish_time + block.data / job.speed
                 # update core start/end
@@ -219,3 +222,4 @@ if __name__ == "__main__":
 
     rs.outputSolutionFromBlock()
     rs.outputSolutionFromCore()
+    plot(rs)
