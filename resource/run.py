@@ -159,10 +159,19 @@ class ResourceScheduler:
 
     def rand_schedule(self):
         # naive
+        end_time = np.zeros(100)
+        for i in range(len(self.jobs)):
+            end_time[i] = 0
         for job in self.jobs:
             hid = random.randint(0, self.numHost - 1)
             cur_host = self.hosts[hid]
             cid = random.randint(0, cur_host.num_core - 1)
+            short_time = 0xfffff
+            cid = 0
+            for i in range(cur_host.num_core):
+                if cur_host.cores[i].finish_time < short_time:
+                    short_time = cur_host.cores[i].finish_time
+                    cid = i
             core = cur_host.cores[cid]
 
             for block in job.blocks:
