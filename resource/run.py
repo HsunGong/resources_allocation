@@ -5,8 +5,10 @@ import numpy as np
 import random
 from plot import plot
 
+
 def list2int(l):
     return [int(i) for i in l]
+
 
 class Block:
     def __init__(self, data: int, host: int, blockid: int, jobid: int):
@@ -86,12 +88,12 @@ class ResourceScheduler:
         # St, Speed of Transimision
         info = file_in.readline().strip().split(" ")
         if self.taskID == 1:
-            self.numJob, self.numHost, self.alpha = list2int(info[:-1]) + [float(info[-1])]
+            self.numJob, self.numHost, self.alpha = list2int(
+                info[:-1]) + [float(info[-1])]
             self.St = None
         else:
             self.numJob, self.numHost, self.alpha, self.St = (
-                list2int(info[:-1]) + [float(info[-2])] + [int(info[-1])]
-            )
+                list2int(info[:-1]) + [float(info[-2])] + [int(info[-1])])
 
         ###### The number of cores for each host
         self.hosts = []
@@ -146,6 +148,7 @@ class ResourceScheduler:
             self.rand_schedule()
         else:
             self.greedy_schedule()
+
     def greedy_schedule(self):
         ## Only task 1 is supported
         assert self.taskID == 1
@@ -157,9 +160,9 @@ class ResourceScheduler:
     def rand_schedule(self):
         # naive
         for job in self.jobs:
-            hid = random.randint(0, self.numHost-1)
+            hid = random.randint(0, self.numHost - 1)
             cur_host = self.hosts[hid]
-            cid = random.randint(0, cur_host.num_core-1)
+            cid = random.randint(0, cur_host.num_core - 1)
             core = cur_host.cores[cid]
 
             for block in job.blocks:
@@ -177,8 +180,10 @@ class ResourceScheduler:
 
     def outputSolutionFromBlock(self):
         print("Task2 Solution (Block Perspective) of Teaching Assistant:")
-        print("The maximum finish time:", max(job.finish_time for job in self.jobs))
-        print("The total response time:", sum(job.finish_time for job in self.jobs))
+        print("The maximum finish time:",
+              max(job.finish_time for job in self.jobs))
+        print("The total response time:",
+              sum(job.finish_time for job in self.jobs))
 
     def outputSolutionFromCore(self):
         print("Task2 Solution (Core Perspective) of Teaching Assistant:")
@@ -190,20 +195,23 @@ class ResourceScheduler:
             total_time += host.finish_time
             print(f"Host:{host.hostid} finishes at time {host.finish_time}:")
             for core in host.cores:
-                print(f"Core {core.coreid} has {len(core.blocks)} tasks and finishes at time {core.finish_time}")
+                print(
+                    f"Core {core.coreid} has {len(core.blocks)} tasks and finishes at time {core.finish_time}"
+                )
                 for block in core.blocks:
                     print(
                         f"\tJob {block.jobid} Block {block.blockid}, runTime {block.start_time} to {block.end_time}"
                     )
 
-        print("The maximum finish time:", max(job.finish_time for job in self.jobs))
-        print("The total response time:", sum(job.finish_time for job in self.jobs))
+        print("The maximum finish time:",
+              max(job.finish_time for job in self.jobs))
+        print("The total response time:",
+              sum(job.finish_time for job in self.jobs))
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-    )
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter, )
     parser.add_argument("--task", default=1, type=int)
     parser.add_argument("--case", default="input/task1_case1.txt", type=str)
     args = parser.parse_args()
