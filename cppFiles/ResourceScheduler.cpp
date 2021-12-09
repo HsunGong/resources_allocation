@@ -111,7 +111,16 @@ void ResourceScheduler::outputSolutionFromCore() {
 		for (int j = 0; j < hostCore[i]; j++) {
 			cout << "\tCore" << j << " has " << hostCoreTask[i][j].size() << " tasks and finishes at time " << hostCoreFinishTime[i][j] << ":\n";
 			for (int k = 0; k < hostCoreTask[i][j].size(); k++) {
-				cout << "\t\tJ" << setw(2) << setfill('0') << get<0>(hostCoreTask[i][j][k]) << ", B" << setw(2) << setfill('0') << get<1>(hostCoreTask[i][j][k]) << ", runTime " << fixed << setprecision(1) << setw(5) << setfill('0') << get<2>(hostCoreTask[i][j][k]) << " to " << fixed << setprecision(1) << setw(5) << setfill('0') << get<3>(hostCoreTask[i][j][k]) << "\n";
+				cout << "\t\tJ" << setw(2) << setfill('0') 
+					<< get<0>(hostCoreTask[i][j][k]) << ", B"
+					 << setw(2) << setfill('0') << 
+					 get<1>(hostCoreTask[i][j][k]) << 
+					 ", runTime " << 
+					 fixed << setprecision(1) << setw(5) 
+					 << setfill('0') 
+					 << get<2>(hostCoreTask[i][j][k]) 
+					 << " to " << fixed << setprecision(1) 
+					<< setw(5) << setfill('0') << get<3>(hostCoreTask[i][j][k]) << "\n";
 			}
 			cout << "\n";
 		}
