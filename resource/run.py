@@ -28,7 +28,7 @@ class Block:
 class Job:
     def __init__(self, jobid, num_block) -> None:
         self.jobid = jobid
-        self.blocks = []
+        self.blocks:List[Block] = []
         self.num_block = num_block
 
         self.speed = -1
@@ -58,7 +58,7 @@ class Core:
         self.finish_time = 0
         # Core perspective: host->core->task-> <job,block,startTime,endTime>
         # [num_host, num_core, task(job, block)]
-        self.blocks = []
+        self.blocks:List[Block] = []
 
     def add_block(self, block:Block, add_finish_time):
         block.start_time = self.finish_time
@@ -77,7 +77,7 @@ class Host:
     def init(self):
         self.finish_time = 0
 
-        self.cores = [Core(self.hostid, idx) for idx in range(self.num_core)]
+        self.cores:List[Core] = [Core(self.hostid, idx) for idx in range(self.num_core)]
         for core in self.cores:
             core.init()
 
@@ -101,14 +101,14 @@ class ResourceScheduler:
             )
 
         ###### The number of cores for each host
-        self.hosts = []
+        self.hosts:List[Host] = []
         info = file_in.readline().strip().split(" ")
         for idx, num_core in enumerate(list2int(info)):
             self.hosts.append(Host(hostid=idx, num_core=num_core))
         assert self.numHost == len(self.hosts)
 
         ###### The number of blocks for each job
-        self.jobs = []
+        self.jobs:List[Job] = []
         info = file_in.readline().strip().split(" ")
         for idx, num_block in enumerate(list2int(info)):
             self.jobs.append(Job(jobid=idx, num_block=num_block))

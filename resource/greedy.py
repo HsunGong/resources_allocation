@@ -33,10 +33,6 @@ def greedy_schedule(rs: ResourceScheduler):
         ## Only task 1 is supported
         assert rs.taskID == 1
 
-        # sort by finish time
-        job_parallel = []
-        job_sequential = []
-
         taskType = rs.taskID
         if taskType == 1:
             hid = 0
