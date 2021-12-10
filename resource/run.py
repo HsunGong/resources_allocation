@@ -21,8 +21,8 @@ class Block:
     def init(self):
         self.hostid = None
         self.coreid = None
-        self.start_time = 0
-        self.end_time = 0
+        self.start_time = np.inf
+        self.end_time = np.inf
 
 
 class Job:
@@ -64,6 +64,7 @@ class Core:
         block.start_time = self.finish_time
         self.finish_time += add_finish_time
         block.end_time = self.finish_time
+
         block.coreid = self.coreid
         block.hostid = self.hostid
         self.blocks.append(block)
@@ -140,6 +141,11 @@ class ResourceScheduler:
             assert len(cur_job.blocks) == cur_job.num_block
 
         self.init_task()
+    
+    def plot(self):
+        return plot(self)
+    def speedup(self, num_core):
+        return 1 - self.alpha(num_core - 1)
 
     def init_task(self):
         for job in self.jobs:
@@ -209,6 +215,7 @@ if __name__ == "__main__":
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument("--task", default=1, type=int)
+    parser.add_argument("--type", default="greedy", type=str)
     parser.add_argument("--case", default="input/task1_case1.txt", type=str)
     args = parser.parse_args()
 
@@ -222,7 +229,7 @@ if __name__ == "__main__":
     # from utils import generator
     # generator(rs, args.task)
 
-    rs.schedule()
+    rs.schedule(args.type)
 
     rs.outputSolutionFromBlock()
     rs.outputSolutionFromCore()
