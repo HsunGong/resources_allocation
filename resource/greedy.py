@@ -1,8 +1,37 @@
 import random
 from typing import List
 import numpy as np
+from resource.plot import plot
 
 from resource.run import ResourceScheduler, Job, Host, Core, Block, list2int
+
+class A():
+    def __init__(self, jobs, hosts) -> None:
+        self.jobs = jobs
+        self.hosts = hosts
+
+def test_job(job, schedule_res, num_core, speed):
+    from copy import deepcopy
+    fake_blocks = deepcopy(job.blocks)
+    core_times = [0] * num_core
+    for i, (core_idx, blk) in enumerate(zip(schedule_res, fake_blocks)):
+        blk.start_time = core_times[core_idx]
+        core_times[core_idx] += blk.data / speed
+        blk.end_time = core_times[core_idx]
+        blk.hostid = 0
+        blk.coreid= core_idx
+        print(f"Block {blk.blockid}, cid:{core_idx}, st:{blk.start_time}, ed:{blk.end_time}")
+
+    fake_job = Job(None, None)
+    fake_job.jobid = 0
+    fake_hosts = Host(None, num_core)
+    fake_hosts.hostid = 0
+    fake_hosts.cores = [Core(0, i) for i in range(num_core)]
+    fake_job.blocks = fake_blocks
+    fake_rs = A([fake_job], [fake_hosts])
+    print(f'Plotting job {job.jobid}, num_core={num_core}')
+    plot(fake_rs)
+    input()
 
 def shortest_end_time(rs, job_i, job, num_core, end_time_coreid):
     """
@@ -14,14 +43,17 @@ def shortest_end_time(rs, job_i, job, num_core, end_time_coreid):
         [blk.data for blk in job.blocks],
         num_core
     )
-    print(f'Schedule for Job {job_i}:', schedule_res)
     core_data_size = [0] * num_core
     for core_idx, blk in zip(schedule_res, job.blocks):
         # Assign end_time_coreid.
         end_time_coreid[job_i][blk.blockid][num_core] = core_idx
         core_data_size[core_idx] += blk.data
     num_core_used = len(set(schedule_res))
-    return max(core_data_size) / num_core_used
+    speed = job.speed * (1 - rs.alpha * (num_core_used - 1))
+    
+    # test_job(job, schedule_res, num_core, speed)
+
+    return max(core_data_size) / speed
 
     # max_time = 0
     # speed = job.speed * (1 - rs.alpha * (num_core - 1))
@@ -64,8 +96,9 @@ def greedy_schedule(rs: ResourceScheduler):
                 job.blocks = sorted(job.blocks, key=lambda x: x.data, reverse=True)
 
             for i in range(num_jobs):
-                for j in range(1, num_core + 1):
-                    end_time[i][j] = shortest_end_time(rs, i, rs.jobs[i], j, end_time_coreid)
+                # for j in range(1, num_core + 1):
+                j = min(len(rs.jobs[i].blocks), num_core)
+                end_time[i][j] = shortest_end_time(rs, i, rs.jobs[i], j, end_time_coreid)
 
             job_block_sort_idx = reversed(np.argsort([len(job.blocks) for job in rs.jobs]))
             # job_block_sort_idx = range(len(rs.jobs))
