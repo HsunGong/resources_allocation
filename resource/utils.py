@@ -1,4 +1,3 @@
-
 import random
 from resource.run import ResourceScheduler, Job, Host, Core, Block, list2int
 random.seed(0)
@@ -34,7 +33,7 @@ def generator(rs: ResourceScheduler, task, numJob=3, numCore=4, numBlock=5):
     job_blocks = []
     for job_idx in range(rs.numJob):
         cur_job = rs.jobs[job_idx]
-        cur_job.blocks = [] # deinit all blocks
+        cur_job.blocks = []  # deinit all blocks
         blocks = []
         for block_idx, data in enumerate(list2int(random.choices(size_range, k=cur_job.num_block))):
             blocks.append(data)
@@ -44,8 +43,8 @@ def generator(rs: ResourceScheduler, task, numJob=3, numCore=4, numBlock=5):
     for job_idx in range(rs.numJob):
         cur_job = rs.jobs[job_idx]
         blocks = job_blocks[job_idx]
-        for block_idx, host in enumerate(list2int(random.choices(size_range, k=cur_job.num_block))):
+        for block_idx, host in enumerate(
+                list2int(random.choices(size_range, k=cur_job.num_block))):
             cur_job.add_block(data=blocks[block_idx], host=host)
 
     rs.init_task()
-

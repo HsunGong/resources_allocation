@@ -4,6 +4,8 @@ from typing import List, NamedTuple, Tuple
 import typing
 import numpy as np
 import random
+from plot import plot
+
 
 
 def list2int(l):
@@ -105,12 +107,12 @@ class ResourceScheduler:
         # St, Speed of Transimision
         info = file_in.readline().strip().split(" ")
         if self.taskID == 1:
-            self.numJob, self.numHost, self.alpha = list2int(info[:-1]) + [float(info[-1])]
+            self.numJob, self.numHost, self.alpha = list2int(
+                info[:-1]) + [float(info[-1])]
             self.St = None
         else:
             self.numJob, self.numHost, self.alpha, self.St = (
-                list2int(info[:-1]) + [float(info[-2])] + [int(info[-1])]
-            )
+                list2int(info[:-1]) + [float(info[-2])] + [int(info[-1])])
 
         ###### The number of cores for each host
         self.hosts:List[Host] = []
@@ -235,14 +237,25 @@ class ResourceScheduler:
 
     def rand_schedule(self):
         # naive
+        end_time = np.zeros(100)
+        for i in range(len(self.jobs)):
+            end_time[i] = 0
         for job in self.jobs:
             hid = random.randint(0, self.numHost - 1)
             cur_host = self.hosts[hid]
             cid = random.randint(0, cur_host.num_core - 1)
+            short_time = 0xfffff
+            cid = 0
+            for i in range(cur_host.num_core):
+                if cur_host.cores[i].finish_time < short_time:
+                    short_time = cur_host.cores[i].finish_time
+                    cid = i
             core = cur_host.cores[cid]
 
             for block in job.blocks:
                 # update start/end
+                block.hostid = hid
+                block.coreid = cid
                 block.start_time = core.finish_time
                 block.end_time = core.finish_time + block.data / job.speed
                 # update core start/end
@@ -284,8 +297,10 @@ class ResourceScheduler:
                         f"\tJob {block.jobid} Block {block.blockid}, runTime {block.start_time:.2f} to {block.end_time:.2f}"
                     )
 
-        print("The maximum finish time:", max(job.finish_time for job in self.jobs))
-        print("The total response time:", sum(job.finish_time for job in self.jobs))
+        print("The maximum finish time:",
+              max(job.finish_time for job in self.jobs))
+        print("The total response time:",
+              sum(job.finish_time for job in self.jobs))
 
     def debug(self):
         for job in self.jobs:
@@ -299,8 +314,7 @@ class ResourceScheduler:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-    )
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter, )
     parser.add_argument("--task", default=1, type=int)
     parser.add_argument("--case", default="input/task1_case1.txt", type=str)
     args = parser.parse_args()
@@ -321,3 +335,4 @@ if __name__ == "__main__":
 
     rs.outputSolutionFromBlock()
     rs.outputSolutionFromCore()
+    plot(rs)
