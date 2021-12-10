@@ -178,6 +178,7 @@ class ResourceScheduler:
                 num_use = min(num_core, len(job.blocks))
                 core_use = 0
                 j = 0
+                finish_time_now = cur_host.cores[0].finish_time
                 speed = job.speed * (1 - self.alpha * (num_use - 1))
                 for block in job.blocks:
                     block.hostid = hid
@@ -188,9 +189,9 @@ class ResourceScheduler:
                     core.add_block(block, block.data/speed)
 
                     j = j + 1
-                for k in range(num_core):
-                    core = cur_host.cores[k]
-                    core.finish_time = end_time[i][num_use]
+                for core in cur_host.cores:
+                    core.finish_time = finish_time_now + end_time[i][num_use]
+                    #print(end_time[i][num_use])
                 # update job finish
                 job.finish_time = core.finish_time
                 # update host finish
