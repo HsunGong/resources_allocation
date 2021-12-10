@@ -4,6 +4,7 @@ from typing import List, NamedTuple, Tuple
 import typing
 import numpy as np
 import random
+import copy
 from plot import plot
 
 
@@ -25,7 +26,7 @@ class Block:
         self.end_time = np.inf
 
     def __repr__(self) -> str:
-        return f"J({self.jobid}) B({self.blockid}) D({self.data}) S({self.start_time:.1f}) E({self.end_time:.1f})"
+        return f"H[{self.host}] J{self.jobid}-B{self.blockid} D({self.data}) T({self.start_time:.1f}-{self.end_time:.1f}) H({self.hostid})/C({self.coreid})"
 
 
 class Job:
@@ -49,7 +50,8 @@ class Job:
         # Block perspective: job number->block number->(hostID, coreID,rank), rank=1 means that block is the first task running on that core of that host
         for idx in range(self.num_block):
             self.blocks[idx].init()
-
+    def __repr__(self) -> str:
+        return f"Job({self.jobid}) with N-block({self.num_block}) by Speed({self.speed})"
 
 class Core:
     def __init__(self, hostid, coreid) -> None:
@@ -77,19 +79,19 @@ class Core:
 
 
 class Host:
-    def __init__(self, hostid, num_core) -> None:
+    def __init__(self, hostid, num_core, prev_core) -> None:
         self.hostid = hostid
         self.num_core = num_core
+        self.prev_core = prev_core
 
     def init(self):
         self.finish_time = 0
 
-        self.cores: List[Core] = [
-            Core(self.hostid, idx) for idx in range(self.num_core)
-        ]
+        self.cores:List[Core] = [Core(self.hostid, idx + self.prev_core) for idx in range(self.num_core)]
         for core in self.cores:
             core.init()
-
+    def __repr__(self) -> str:
+        return f"H({self.hostid}) N({self.num_core})"
 
 class ResourceScheduler:
     def __init__(self, task, file_in) -> None:
@@ -107,13 +109,16 @@ class ResourceScheduler:
             self.St = None
         else:
             self.numJob, self.numHost, self.alpha, self.St = (
-                list2int(info[:-1]) + [float(info[-2])] + [int(info[-1])])
+                list2int(info[:-2]) + [float(info[-2])] + [int(info[-1])]
+            )
 
         ###### The number of cores for each host
         self.hosts: List[Host] = []
         info = file_in.readline().strip().split(" ")
+        prev_core = 0
         for idx, num_core in enumerate(list2int(info)):
-            self.hosts.append(Host(hostid=idx, num_core=num_core))
+            self.hosts.append(Host(hostid=idx, num_core=num_core, prev_core=prev_core))
+            prev_core += num_core
         assert self.numHost == len(self.hosts)
 
         ###### The number of blocks for each job
@@ -145,11 +150,12 @@ class ResourceScheduler:
             info = file_in.readline().strip().split(" ")
             for block_idx, host in enumerate(list2int(info)):
                 cur_job.add_block(data=blocks[block_idx], host=host)
-
+            # print(cur_job.blocks)
             assert len(cur_job.blocks) == cur_job.num_block
 
         self.init_task()
 
+    
     def plot(self):
         return plot(self)
 
@@ -213,10 +219,10 @@ class ResourceScheduler:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter, )
-    parser.add_argument("--task", default=1, type=int)
-    parser.add_argument("--type", default="greedy", type=str)
-    parser.add_argument("--case", default="input/task1_case1.txt", type=str)
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser.add_argument("--task", default=2, type=int)
+    parser.add_argument("--case", default="input/task2_case1.txt", type=str)
     args = parser.parse_args()
 
     if args.case is None:
@@ -230,13 +236,12 @@ if __name__ == "__main__":
     generator(rs, args.task, numJob=15, numBlock=80, numCore=30)
     print(f'Generate random testcase.')
 
-    def schedule(scheduler):
+    def schedule_task1(scheduler):
         # NOTE: block.hostid/coreid
         # NOTE: block.start_time/end_time
         from resource.greedy import greedy_schedule, greedy_schedule_enum_core, greedy2
         from resource.greedy import single_core
         from resource.rand import rand_schedule
-        import copy
 
         best = None
         finish_time = np.inf
@@ -263,13 +268,34 @@ if __name__ == "__main__":
                 best = (sc, f'greedy2_{npm1+1}')
                 finish_time = max(host.finish_time for host in sc.hosts)
                 
-        return best
+        return best, finish_time
 
-    best_rs, _type = schedule(rs)
+    def schedule_task2(scheduler):
+        # NOTE: block.hostid/coreid
+        # NOTE: block.start_time/end_time
+        from resource.greedy_task2 import greedy
+
+        best = None
+        finish_time = np.inf
+        for _type in ["greedy"]:
+            sc = copy.deepcopy(scheduler)
+            eval(_type)(sc)
+            if max(host.finish_time for host in sc.hosts) < finish_time:
+                best = (sc, _type)
+                finish_time = max(host.finish_time for host in sc.hosts)
+
+        return best, finish_time
     
+    if args.task == 1:
+        (best_rs, _type), finish_time = schedule_task1(rs)
+    else:
+        (best_rs, _type), finish_time = schedule_task2(rs)
 
+    print(_type, finish_time)
     # best_rs.outputSolutionFromBlock()
     # best_rs.outputSolutionFromCore()
     print('>' * 10, 'OPT scheduler:', _type, '<' * 10)
     plot(best_rs)
 
+    # python resource/run.py --case input/task1_case1.txt --task 1
+    # python resource/run.py --case input/task2_case1.txt --task 2
