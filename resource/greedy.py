@@ -1,9 +1,14 @@
 import random
+from typing import List
 import numpy as np
 
 from resource.run import ResourceScheduler, Job, Host, Core, Block, list2int
 
 def shortest_end_time(rs, job_i, job, cores, end_time_coreid):
+    """
+    Return the shortest time when job_i can only use j cores
+    and record the index of each block on those cores.
+    """
     if cores == 0:
         return 0
     max_time = 0
@@ -78,48 +83,49 @@ def greedy_schedule(rs: ResourceScheduler):
                 i = i + 1
                 
                 
-def single_core(rs):# need imporvement
-        # naive
-#       end_time = np.zeros(100)
-#       for i in range(len(self.jobs)):
-#       end_time[i] = 0
-    sort_time = np.zeros((len(rs.jobs),2))
-    index = 0
-    for job in rs.jobs:
-        sort_time[index][0] = index
-        for block in job.blocks: 
-            sort_time[index][1] = sort_time[index][1] + block.data
-        sort_time[index][1] = sort_time[index][1] / job.speed
-        index = index + 1
-    
-    sort_time = sorted(sort_time, key=lambda x:x[1], reverse= True)
+def single_core(rs):
+    job_time_single_core = [
+        sum(blk.data for blk in job.blocks) / job.speed
+        for job in rs.jobs
+    ]
 
-    for i in range(len(sort_time)):
-        print(sort_time[i])
-    #assert 1 == 0
-
-    for i in range(len(sort_time)):
-        job = rs.jobs[int(sort_time[i][0])]
-        hid = random.randint(0, rs.numHost - 1)
-        cur_host = rs.hosts[hid]
-        #cid = random.randint(0, cur_host.num_core - 1)
-        short_time = 0xfffff
-        cid = 0
-        for i in range(cur_host.num_core):
-            if cur_host.cores[i].finish_time < short_time:
-                short_time = cur_host.cores[i].finish_time
-                cid = i
-        core = cur_host.cores[cid]
-
+    allocated_cores = multi_job_schedule(
+        job_time_single_core,
+        len(rs.hosts[0].cores)
+    )
+    hid = 0
+    cur_host = rs.hosts[hid]
+    for i, i_core in enumerate(allocated_cores):
+        job = rs.jobs[i]
+        core = cur_host.cores[i_core]
         for block in job.blocks:
             # update start/end
             block.hostid = hid
-            block.coreid = cid
+            block.coreid = i_core
             block.start_time = core.finish_time
             block.end_time = core.finish_time + block.data / job.speed
             # update core start/end
             core.add_block(block, block.data / job.speed)
-        # update job finish
         job.finish_time = core.finish_time
-        # update host finish
         cur_host.finish_time = max(cur_host.finish_time, core.finish_time)
+
+def multi_job_schedule(times: List[int], num_cores: int):
+    """Schedule for multi time-blocks
+    times: a list of int
+    num_cores: how many cores to use
+
+    Return: a list of len(times) which is each time-block's index of core
+    """
+
+    finish_time_per_core = [0] * num_cores
+    ans_idx = [-1] * len(times)
+
+    time_idx_sorted = list(reversed(np.argsort(times)))
+
+    for i in time_idx_sorted:
+        core_idx = np.argmin(finish_time_per_core)
+        finish_time_per_core[core_idx] += times[i]
+        ans_idx[i] = core_idx
+    
+    return ans_idx
+
