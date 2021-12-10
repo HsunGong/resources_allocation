@@ -3,10 +3,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.colors as mcolors
 
-COLOR_TABLE = list(reversed(mcolors.XKCD_COLORS.values()))
-
-
 def plot(scheduler):
+    # COLOR_TABLE = plt.get_cmap('RdYlGn')(np.linspace(0.15, 0.85, scheduler.numJob))
+    COLOR_TABLE = list(reversed(mcolors.XKCD_COLORS.values()))
+
     y_shift = [0] * len(scheduler.hosts)
     y_labels = []
     y_labels.extend(
@@ -22,6 +22,7 @@ def plot(scheduler):
     plt.rcdefaults()
     fig, ax = plt.subplots()
 
+    handles = []
     def plot_job(job):
         job_color = COLOR_TABLE[job.jobid]
         for blk in job.blocks:
@@ -29,7 +30,10 @@ def plot(scheduler):
                     left=blk.start_time,
                     width=blk.end_time - blk.start_time,
                     color=job_color,
+                    label=job.jobid,
                     edgecolor='k')
+            from matplotlib.patches import Patch
+        handles.append(Patch(facecolor=job_color, label=job.jobid))
 
     for job in scheduler.jobs:
         plot_job(job)
@@ -38,4 +42,8 @@ def plot(scheduler):
     ax.invert_yaxis()
     ax.set_xlabel('Time')
     ax.set_title('Visualization of running')
+    # ax.legend(ncol=scheduler.numJob, bbox_to_anchor=(0, 1), labels=[i for i in range(scheduler.numJob)],
+            #   loc='upper left', fontsize='small')
+    plt.legend(ncol=5,handles=handles[:10], loc='upper left', fontsize='small', bbox_to_anchor=(0, -0.2))
+    plt.tight_layout()
     plt.show()

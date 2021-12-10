@@ -24,6 +24,8 @@ class Block:
         self.start_time = np.inf
         self.end_time = np.inf
 
+    def __repr__(self) -> str:
+        return f"J({self.jobid}) B({self.blockid}) D({self.data}) S({self.start_time:.1f}) E({self.end_time:.1f})"
 
 class Job:
     def __init__(self, jobid, num_block) -> None:
@@ -68,7 +70,8 @@ class Core:
         block.coreid = self.coreid
         block.hostid = self.hostid
         self.blocks.append(block)
-
+    def __repr__(self) -> str:
+        return f"H({self.hostid}) C({self.coreid})"
 
 class Host:
     def __init__(self, hostid, num_core) -> None:
@@ -231,6 +234,6 @@ if __name__ == "__main__":
 
     rs.schedule(args.type)
 
-    rs.outputSolutionFromBlock()
-    rs.outputSolutionFromCore()
+    # rs.outputSolutionFromBlock()
+    # rs.outputSolutionFromCore()
     plot(rs)

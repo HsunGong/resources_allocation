@@ -58,38 +58,46 @@ def greedy_schedule(rs: ResourceScheduler):
             num_core = cur_host.num_core
 
             num_block = max(len(job.blocks) for job in rs.jobs)
-            end_time = np.zeros((num_jobs, num_core + 1))
-            end_time_coreid = np.zeros((num_jobs, num_block, num_core + 1))
             for job in rs.jobs:
-                job.blocks = sorted(job.blocks, key=lambda x: x.data, reverse=True)
+                job.blocks.sort(key=lambda x: x.data, reverse=True) # Last Finsh First
 
-            for i in range(num_jobs):
-                for j in range(1, num_core + 1):
-                    end_time[i][j] = shortest_end_time(rs, i, rs.jobs[i], j, end_time_coreid)
+            # estimate end time
+            # end_time = np.zeros((num_jobs, num_core + 1))
+            # end_time_coreid = np.zeros((num_jobs, num_block, num_core + 1))
+            # for i in range(num_jobs):
+            #     for j in range(1, num_core + 1):
+            #         end_time[i][j] = shortest_end_time(rs, i, rs.jobs[i], j, end_time_coreid)
 
-            job_block_sort_idx = reversed(np.argsort([len(job.blocks) for job in rs.jobs]))
+
+            # job_block_sort_idx = reversed(np.argsort([len(job.blocks) for job in rs.jobs]))
             # job_block_sort_idx = range(len(rs.jobs))
-            for job_idx in job_block_sort_idx:
-                print('-='*10, job_idx)
-                job = rs.jobs[job_idx]
+            jobids = [i for i in range(rs.numJob)]
+            for jid in jobids:
+                job = rs.jobs[jid]
                 num_use = min(num_core, len(job.blocks))
-                core_use = 0
-                finish_time_now = 0
                 speed = job.speed * (1 - rs.alpha * (num_use - 1))
-                for j, block in enumerate(job.blocks):
-                    block.hostid = hid
-                    block.coreid = end_time_coreid[job_idx][j][num_use] + core_use
-                    core = cur_host.cores[int(block.coreid)]
-                    block.start_time = core.finish_time
-                    block.end_time = core.finish_time + block.data / speed
-                    finish_time_now = max(finish_time_now, block.end_time)
-                    core.add_block(block, block.data / speed)
-                for core in cur_host.cores:
+                
+                used_cores = set()
+                core = max(cur_host.cores, key=lambda core: core.finish_time)
+                
+                # estimate end time
+                for block in job.blocks:
+                    # find ealiest core
+                    
+                    # finish_time --> core.finish_time + block.data / speed
+                    core.add_block(block, add_finish_time=block.data / speed)
+                    print(f"Assign Block {block} to Core {core}")
+                    used_cores.add(core)
+                    core = min(cur_host.cores, key=lambda core: core.finish_time)
+
+                finish_time_now = max(used_cores, key=lambda core: core.finish_time).finish_time
+                for core in used_cores:
                     core.finish_time = finish_time_now
+                
                 # update job finish
-                job.finish_time = core.finish_time
+                job.finish_time = finish_time_now
                 # update host finish
-                cur_host.finish_time = max(cur_host.finish_time, core.finish_time)
+                cur_host.finish_time = max(cur_host.finish_time, finish_time_now)
                 
                 
 def single_core(rs):
