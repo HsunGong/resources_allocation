@@ -71,7 +71,7 @@ class Core:
         block.hostid = self.hostid
         self.blocks.append(block)
     def __repr__(self) -> str:
-        return f"H({self.hostid}) C({self.coreid})"
+        return f"H({self.hostid}) C({self.coreid}) F({self.finish_time:.1f})"
 
 class Host:
     def __init__(self, hostid, num_core) -> None:
