@@ -7,7 +7,6 @@ import random
 from plot import plot
 
 
-
 def list2int(l):
     return [int(i) for i in l]
 
@@ -18,9 +17,7 @@ class Block:
         self.jobid = jobid
         self.data = data
         self.host = host
-    def __repr__(self) -> str:
-        return f"J({self.jobid}) B({self.blockid}) D({self.data})"
-    
+
     def init(self):
         self.hostid = None
         self.coreid = None
@@ -31,13 +28,10 @@ class Block:
 class Job:
     def __init__(self, jobid, num_block) -> None:
         self.jobid = jobid
-        self.blocks:List[Block] = []
+        self.blocks = []
         self.num_block = num_block
 
         self.speed = -1
-        self.finished = 0
-    def __repr__(self) -> str:
-        return f"Job({self.jobid}) Speed:{self.speed} Finished:{self.finished}"
 
     def add_block(self, data, host):
         block = Block(data, host, blockid=len(self.blocks), jobid=self.jobid)
@@ -53,19 +47,11 @@ class Job:
         for idx in range(self.num_block):
             self.blocks[idx].init()
 
-    def end_sequential(self):
-        return sum(block.data for block in self.blocks) / self.speed
-
-    def end_parallel(self):
-        return max(block.data for block in self.blocks) / self.speed
-
 
 class Core:
     def __init__(self, hostid, coreid) -> None:
         self.hostid = hostid
         self.coreid = coreid
-    def __repr__(self) -> str:
-        return f"Core({self.coreid})"
 
     def init(self):
         # host->core->finishTime : [num_host, num_core]
@@ -83,15 +69,11 @@ class Host:
     def __init__(self, hostid, num_core) -> None:
         self.hostid = hostid
         self.num_core = num_core
-        self.cores:List[Core] = []
-
-    def __repr__(self) -> str:
-        return f"Host({self.hostid})"
 
     def init(self):
         self.finish_time = 0
 
-        self.cores:List[Core] = [Core(self.hostid, idx) for idx in range(self.num_core)]
+        self.cores = [Core(self.hostid, idx) for idx in range(self.num_core)]
         for core in self.cores:
             core.init()
 
@@ -115,14 +97,14 @@ class ResourceScheduler:
                 list2int(info[:-1]) + [float(info[-2])] + [int(info[-1])])
 
         ###### The number of cores for each host
-        self.hosts:List[Host] = []
+        self.hosts = []
         info = file_in.readline().strip().split(" ")
         for idx, num_core in enumerate(list2int(info)):
             self.hosts.append(Host(hostid=idx, num_core=num_core))
         assert self.numHost == len(self.hosts)
 
         ###### The number of blocks for each job
-        self.jobs:List[Job] = []
+        self.jobs = []
         info = file_in.readline().strip().split(" ")
         for idx, num_block in enumerate(list2int(info)):
             self.jobs.append(Job(jobid=idx, num_block=num_block))
@@ -162,84 +144,96 @@ class ResourceScheduler:
         for host in self.hosts:
             host.init()
 
-    def schedule(self, type="greedy"):
-        if type == "rand":
-            self.rand_schedule()
-        elif type == "greedy":
-            self.greedy_schedule()
-        else:
-            raise ValueError
-
-    def speed(self, core=1):
-        # g(e)=1-alpha(e-1)
-        assert self.alpha * (core - 1)>= 0 and self.alpha * (core - 1) <= 1
-        return 1 - self.alpha * (core - 1)
+    def schedule(self, type="rand"):
+        self.greedy_schedule()
 
     def greedy_schedule(self):
         ## Only task 1 is supported
         assert self.taskID == 1
-        jobids:List[int] = [i for i in range(self.numJob)]
 
-        # sort by earily finish time
-        job_parallel:List[int] = sorted(jobids, key=lambda jobid: self.speed(core=len(self.jobs[jobid].blocks)) * self.jobs[jobid].end_parallel())
-        job_parallel:List[Tuple(int,float)] = [(jid, self.speed(core=len(self.jobs[jid].blocks)) * self.jobs[jid].end_parallel()) for jid in job_parallel]
-        job_sequential:List[int] = sorted(jobids, key=lambda jobid: self.jobs[jobid].end_sequential())
-        job_sequential:List[Tuple(int,float)] = [(i, self.jobs[i].end_sequential()) for i in job_sequential]
-        print(job_parallel)
-        print(job_sequential)
-        
-        accum_job = job_parallel + job_sequential
-        # greedily allocate parallel job, then sequential
-        host:Host = self.hosts[0]
-        for jobid, max_time in job_parallel:
-            job = self.jobs[jobid]
-            if len(job.blocks) <= len(host.cores):
-                # earilest_cores = sorted(host.cores, key=lambda core: core.finish_time)[:job.num_block]
-                # NOTE: latest core first
-                earilest_cores = sorted(host.cores, key=lambda core: core.finish_time, reverse=True)[:job.num_block]
-                max_start_time = max(core.finish_time for core in earilest_cores)
-                max_finish_time = max_start_time + max_time
-                
-                job.finish_time = max_finish_time
-                for idx, block in enumerate(job.blocks):
-                    block.start_time = max_start_time
-                    block.end_time = max_finish_time
-                    block.hostid = host.hostid
-                    block.coreid = earilest_cores[idx].coreid
-                    earilest_cores[idx].add_block(block, max_finish_time)
-                    print(f"{host}:{earilest_cores[idx]} add block({block}) and finish by {earilest_cores[idx].finish_time}")
-                job.finished = 1 # NOTE: Status 1 means is allocated by parallel
+        # sort by finish time
+        job_parallel = []
+        job_sequential = []
+
+        taskType = self.taskID
+        if taskType == 1:
+            hid = 0
+            cur_host = self.hosts[hid]
+            num_jobs = len(self.jobs)
+            num_core = cur_host.num_core
+            num_block = 0
+            for job in self.jobs:
+                num_block = max(num_block, len(job.blocks))
+            end_time = np.zeros((num_jobs, num_core))
+            end_time_coreid = np.zeros((num_jobs, num_block, num_core))
+            for job in self.jobs:
+                job.blocks = sorted(job.blocks,  key=lambda x:x.data , reverse=True)
+
+            for i in range(num_jobs):
+                for j in range(num_core):
+                    end_time[i][j] = self.shortest_end_time(self.jobs[i], j, end_time_coreid[i])
             
-        host:Host = self.hosts[0]
-        for jobid, max_time in job_sequential:
-            job = self.jobs[jobid]
-            if job.finished == 1: # Already allocated by parallel
-                # Find a optimal solution?
-                pass
-            else:
-                earilest_core = sorted(host.cores, key=lambda core: core.finish_time)[0]
-                # earilest_cores = sorted(host.cores, key=lambda core: core.finish_time, reverse=True)[:job.num_block]
-                
-                for idx, block in enumerate(job.blocks):
-                    block.start_time = earilest_core.finish_time
-                    block.end_time = earilest_core.finish_time + block.data / job.speed
-                    block.hostid = host.hostid
-                    block.coreid = earilest_core.coreid
-                    earilest_core.add_block(block, earilest_core.finish_time + block.data / job.speed)
-                    print(f"2 {host}:{earilest_core} add block({block}) and finish by {earilest_core.finish_time}")
-                    earilest_core = sorted(host.cores, key=lambda core: core.finish_time)[0]
-                job.finish_time = block.end_time # last block end time
+            i = 0
+            for job in self.jobs:
+                num_use = min(num_core, len(job.blocks))
+                core_use = 0
+                j = 0
+                speed = job.speed * (1 - self.alpha * (num_use - 1))
+                for block in job.blocks:
+                    block.hostid = hid
+                    block.coreid = end_time_coreid[i][j][num_use] + core_use
+                    core = cur_host.cores[block.coreid]
+                    block.start_time = core.finish_time
+                    block.end_time = core.finish_time + block.data / speed
+                    core.add_block(block, block.data/speed)
 
-                job.finished = 2 # NOTE: Status 1 means is allocated by parallel
-        
-        for host in self.hosts:
-            host.finish_time = max(core.finish_time for core in host.cores)
+                    j = j + 1
+                for k in num_core:
+                    core = cur_host.cores[k]
+                    core.finish_time = end_time[i][num_use]
+                # update job finish
+                job.finish_time = core.finish_time
+                # update host finish
+                cur_host.finish_time = max(cur_host.finish_time, core.finish_time)
+
+                i = i + 1
+
+
+    def shortest_end_time(job, cores, end_time_coreid, self):
+        max_time = 0
+        job = self.jobs[job_i]
+        speed = job.speed * (1 - self.alpha * (cores - 1))
+        if job.blocks <= cores:
+            for i in len(job.blocks):
+                max_time = max(max_time, job.blocks[i].data)
+                end_time_coreid[i][cores] = i
+            ans = max_time / speed
+            return ans
+
+        core_time = np.zeros(cores)
+        for block in job.blocks:
+            short_time = 0xffffff
+            cid = 0
+            for i in cores:
+                if core_time[i] < short_time:
+                    short_time = core_time[i]
+                    cid = i
+            core_time[cid] = core_time[cid] + block.data
+            end_time_coreid[block.blockid][cores] = cid
+        for i in cores:
+            max_time = max(max_time, core_time[i])
+        ans = max_time/speed
+        return ans
+
+    
+
+
 
     def rand_schedule(self):
         # naive
-        end_time = np.zeros(100)
-        for i in range(len(self.jobs)):
-            end_time[i] = 0
+#        end_time = np.zeros(100)
+#        for i in range(len(self.jobs)):
+#            end_time[i] = 0
         for job in self.jobs:
             hid = random.randint(0, self.numHost - 1)
             cur_host = self.hosts[hid]
@@ -264,20 +258,13 @@ class ResourceScheduler:
             job.finish_time = core.finish_time
             # update host finish
             cur_host.finish_time = max(cur_host.finish_time, core.finish_time)
-        for host in self.hosts:
-            host.finish_time = max(core.finish_time for core in host.cores)
 
     def outputSolutionFromBlock(self):
         print("Task2 Solution (Block Perspective) of Teaching Assistant:")
-        for job in self.jobs:
-            print(f"Job {job.jobid} obtains {job.used_cores} cores (speed={job.speed})"
-                f"and finishes at time {job.finish_time}:")
-            for block in job.blocks:
-                speed = block.data/job.speed * 1 if job.finished == 1 else self.speed(core=len(job.blocks))
-                print(f"Block{block.blockid}: H{block.hostid}, C{block.coreid}, R'TODO'(time={speed:.2f}),")
-        print("The maximum finish time:", max(job.finish_time for job in self.jobs))
-        print("The total response time:", sum(job.finish_time for job in self.jobs))
-        print("Utilization rate:", sum(job.finish_time for job in self.jobs) / sum(host.finish_time for host in self.hosts))
+        print("The maximum finish time:",
+              max(job.finish_time for job in self.jobs))
+        print("The total response time:",
+              sum(job.finish_time for job in self.jobs))
 
     def outputSolutionFromCore(self):
         print("Task2 Solution (Core Perspective) of Teaching Assistant:")
@@ -287,14 +274,14 @@ class ResourceScheduler:
         for host in self.hosts:
             max_host_time = max(max_host_time, host.finish_time)
             total_time += host.finish_time
-            print(f"Host:{host.hostid} finishes at time {host.finish_time:.2f}:")
+            print(f"Host:{host.hostid} finishes at time {host.finish_time}:")
             for core in host.cores:
                 print(
-                    f"Core {core.coreid} has {len(core.blocks)} tasks and finishes at time {core.finish_time:.2f}"
+                    f"Core {core.coreid} has {len(core.blocks)} tasks and finishes at time {core.finish_time}"
                 )
                 for block in core.blocks:
                     print(
-                        f"\tJob {block.jobid} Block {block.blockid}, runTime {block.start_time:.2f} to {block.end_time:.2f}"
+                        f"\tJob {block.jobid} Block {block.blockid}, runTime {block.start_time} to {block.end_time}"
                     )
 
         print("The maximum finish time:",
@@ -302,15 +289,6 @@ class ResourceScheduler:
         print("The total response time:",
               sum(job.finish_time for job in self.jobs))
 
-    def debug(self):
-        for job in self.jobs:
-            print(job)
-            for block in job.blocks:
-                print(block)
-        
-        for host in self.hosts:
-            for core in host.cores:
-                print(core)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -326,12 +304,10 @@ if __name__ == "__main__":
 
     rs = ResourceScheduler(args.task, file_in)
 
-    from utils import generator
-    generator(rs, args.task)
-    rs.debug()
+    # from utils import generator
+    # generator(rs, args.task)
 
-    rs.schedule("greedy")
-    # rs.schedule("rand")
+    rs.schedule()
 
     rs.outputSolutionFromBlock()
     rs.outputSolutionFromCore()
