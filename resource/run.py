@@ -161,9 +161,13 @@ class ResourceScheduler:
         # NOTE: block.hostid/coreid
         # NOTE: block.start_time/end_time
         if type == "greedy":
-            from resource.greedy import greedy_schedule, single_core
+            from resource.greedy import greedy_schedule
 
             greedy_schedule(self)
+        if type == "single_core":
+            from resource.greedy import single_core
+
+            single_core(self)
         elif type == "list":
             from resource.list import list_schedule
 
