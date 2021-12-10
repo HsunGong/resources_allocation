@@ -157,26 +157,6 @@ class ResourceScheduler:
         for host in self.hosts:
             host.init()
 
-    def schedule(self, type="rand"):
-        # NOTE: block.hostid/coreid
-        # NOTE: block.start_time/end_time
-        if type == "greedy":
-            from resource.greedy import greedy_schedule
-
-            greedy_schedule(self)
-        if type == "single_core":
-            from resource.greedy import single_core
-
-            single_core(self)
-        elif type == "list":
-            from resource.list import list_schedule
-
-            list_schedule(self)
-        elif type == "rand":
-            from resource.rand import rand_schedule
-
-            rand_schedule(self)
-
     def outputSolutionFromBlock(self):
         print("Task2 Solution (Block Perspective) of Teaching Assistant:")
         for job in self.jobs:
@@ -236,8 +216,28 @@ if __name__ == "__main__":
     # from utils import generator
     # generator(rs, args.task)
 
-    rs.schedule(args.type)
+    def schedule(scheduler):
+        # NOTE: block.hostid/coreid
+        # NOTE: block.start_time/end_time
+        from resource.greedy import greedy_schedule
+        from resource.greedy import single_core
+        from resource.rand import rand_schedule
+        import copy
 
-    # rs.outputSolutionFromBlock()
-    # rs.outputSolutionFromCore()
-    plot(rs)
+        best = None
+        finish_time = np.inf
+        for _type in ["rand_schedule", "single_core","greedy_schedule",]:
+            sc = copy.deepcopy(scheduler)
+            eval(_type)(sc)
+            if max(host.finish_time for host in sc.hosts) < finish_time:
+                best = (sc, _type)
+                finish_time = max(host.finish_time for host in sc.hosts)
+
+        return best
+
+    best_rs, _type = schedule(rs)
+    print(_type)
+
+    # best_rs.outputSolutionFromBlock()
+    # best_rs.outputSolutionFromCore()
+    plot(best_rs)

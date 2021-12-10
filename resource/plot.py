@@ -26,7 +26,6 @@ def plot(scheduler):
     def plot_job(job):
         job_color = COLOR_TABLE[job.jobid]
         for blk in job.blocks:
-            print(f"{job}, {blk}")
             ax.barh(y=compute_yaxis(blk.hostid, blk.coreid),
                     left=blk.start_time,
                     width=blk.end_time - blk.start_time,

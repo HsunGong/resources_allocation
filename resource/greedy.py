@@ -105,7 +105,7 @@ def greedy_schedule(rs: ResourceScheduler):
             # job_block_sort_idx = range(len(rs.jobs))
             jobids = [i for i in range(rs.numJob)]
             jobids = sorted(jobids, key=lambda id: sum(block.data for block in rs.jobs[id].blocks) / rs.jobs[id].speed, reverse=True)
-            print(jobids)
+            # print(jobids)
             for jid in jobids:
                 job = rs.jobs[jid]
                 num_use = min(num_core, len(job.blocks))
@@ -124,7 +124,7 @@ def greedy_schedule(rs: ResourceScheduler):
                     
                     # finish_time --> core.finish_time + block.data / speed
                     core.add_block(block, add_finish_time=block.data / speed)
-                    print(f"Assign Block {block} to Core {core}")
+                    # print(f"Assign Block {block} to Core {core}")
                     # used_cores.add(core)
 
                 finish_time_now = max(used_cores, key=lambda core: core.finish_time).finish_time
@@ -152,7 +152,6 @@ def single_core(rs):
     for i, i_core in enumerate(allocated_cores):
         job = rs.jobs[i]
         core = cur_host.cores[i_core]
-        print(job)
         for block in job.blocks:
             # update start/end
             block.hostid = hid
