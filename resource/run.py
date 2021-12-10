@@ -164,13 +164,13 @@ class ResourceScheduler:
             num_block = 0
             for job in self.jobs:
                 num_block = max(num_block, len(job.blocks))
-            end_time = np.zeros((num_jobs, num_core))
-            end_time_coreid = np.zeros((num_jobs, num_block, num_core))
+            end_time = np.zeros((num_jobs, num_core + 1))
+            end_time_coreid = np.zeros((num_jobs, num_block, num_core + 1))
             for job in self.jobs:
                 job.blocks = sorted(job.blocks,  key=lambda x:x.data , reverse=True)
 
             for i in range(num_jobs):
-                for j in range(num_core):
+                for j in range(num_core + 1):
                     end_time[i][j] = self.shortest_end_time(self.jobs[i], j, end_time_coreid[i])
             
             i = 0
@@ -182,13 +182,13 @@ class ResourceScheduler:
                 for block in job.blocks:
                     block.hostid = hid
                     block.coreid = end_time_coreid[i][j][num_use] + core_use
-                    core = cur_host.cores[block.coreid]
+                    core = cur_host.cores[int(block.coreid)]
                     block.start_time = core.finish_time
                     block.end_time = core.finish_time + block.data / speed
                     core.add_block(block, block.data/speed)
 
                     j = j + 1
-                for k in num_core:
+                for k in range(num_core):
                     core = cur_host.cores[k]
                     core.finish_time = end_time[i][num_use]
                 # update job finish
@@ -199,28 +199,28 @@ class ResourceScheduler:
                 i = i + 1
 
 
-    def shortest_end_time(job, cores, end_time_coreid, self):
+    def shortest_end_time(self, job, cores, end_time_coreid):
+        if cores == 0:
+            return 0
         max_time = 0
-        job = self.jobs[job_i]
         speed = job.speed * (1 - self.alpha * (cores - 1))
-        if job.blocks <= cores:
-            for i in len(job.blocks):
+        if len(job.blocks) <= cores:
+            for i in range(len(job.blocks)):
                 max_time = max(max_time, job.blocks[i].data)
                 end_time_coreid[i][cores] = i
             ans = max_time / speed
             return ans
-
         core_time = np.zeros(cores)
         for block in job.blocks:
             short_time = 0xffffff
             cid = 0
-            for i in cores:
+            for i in range(cores):
                 if core_time[i] < short_time:
                     short_time = core_time[i]
                     cid = i
             core_time[cid] = core_time[cid] + block.data
             end_time_coreid[block.blockid][cores] = cid
-        for i in cores:
+        for i in range(cores):
             max_time = max(max_time, core_time[i])
         ans = max_time/speed
         return ans
