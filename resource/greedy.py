@@ -78,14 +78,30 @@ def greedy_schedule(rs: ResourceScheduler):
                 i = i + 1
                 
                 
-def rand_schedule(self):# need imporvement
+def single_core(rs):# need imporvement
         # naive
 #       end_time = np.zeros(100)
 #       for i in range(len(self.jobs)):
 #       end_time[i] = 0
-    for job in self.jobs:
-        hid = random.randint(0, self.numHost - 1)
-        cur_host = self.hosts[hid]
+    sort_time = np.zeros((len(rs.jobs),2))
+    index = 0
+    for job in rs.jobs:
+        sort_time[index][0] = index
+        for block in job.blocks: 
+            sort_time[index][1] = sort_time[index][1] + block.data
+        sort_time[index][1] = sort_time[index][1] / job.speed
+        index = index + 1
+    
+    sort_time = sorted(sort_time, key=lambda x:x[1], reverse= True)
+
+    for i in range(len(sort_time)):
+        print(sort_time[i])
+    #assert 1 == 0
+
+    for i in range(len(sort_time)):
+        job = rs.jobs[int(sort_time[i][0])]
+        hid = random.randint(0, rs.numHost - 1)
+        cur_host = rs.hosts[hid]
         #cid = random.randint(0, cur_host.num_core - 1)
         short_time = 0xfffff
         cid = 0
