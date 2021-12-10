@@ -1,6 +1,6 @@
 import random
 from resource.run import ResourceScheduler, Job, Host, Core, Block, list2int
-random.seed(0)
+# random.seed(11)
 
 # def generator(rs: ResourceScheduler, task, numJob=15, numCore=30, numBlock=80):
 def generator(rs: ResourceScheduler, task, numJob=3, numCore=4, numBlock=5):
@@ -13,8 +13,8 @@ def generator(rs: ResourceScheduler, task, numJob=3, numCore=4, numBlock=5):
         rs.numHost = 1
         rs.St = None
 
-    core_range = [i for i in range(3, numCore)] # 20-30
-    block_range = [i for i in range(1, numBlock)] # 20-80
+    core_range = [i for i in range(20, numCore)] # 20-30
+    block_range = [i for i in range(20, numBlock)] # 20-80
     size_range = [i for i in range(50, 200)]
     speed_range = [i for i in range(20, 80)]
 

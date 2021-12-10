@@ -226,14 +226,14 @@ if __name__ == "__main__":
 
     rs = ResourceScheduler(args.task, file_in)
 
-    # from utils import generator
-    # generator(rs, args.task, numJob=5, numBlock=20, numCore=7)
-    # print(f'Generate random testcase.')
+    from utils import generator
+    generator(rs, args.task, numJob=15, numBlock=80, numCore=30)
+    print(f'Generate random testcase.')
 
     def schedule(scheduler):
         # NOTE: block.hostid/coreid
         # NOTE: block.start_time/end_time
-        from resource.greedy import greedy_schedule, greedy_schedule_enum_core
+        from resource.greedy import greedy_schedule, greedy_schedule_enum_core, greedy2
         from resource.greedy import single_core
         from resource.rand import rand_schedule
         import copy
@@ -241,8 +241,10 @@ if __name__ == "__main__":
         best = None
         finish_time = np.inf
         for _type in [
-                "rand_schedule", "single_core", "greedy_schedule",
-                "greedy_schedule_enum_core"
+                # "rand_schedule", 
+                "single_core", 
+                # "greedy_schedule",
+                # "greedy_schedule_enum_core",
         ]:
             # for _type in ["greedy_schedule_enum_core"]:
             sc = copy.deepcopy(scheduler)
@@ -250,14 +252,24 @@ if __name__ == "__main__":
             if max(host.finish_time for host in sc.hosts) < finish_time:
                 best = (sc, _type)
                 finish_time = max(host.finish_time for host in sc.hosts)
-
+            # print(_type)
+            # plot(sc)
+        for npm1 in range(1, 15):
+            sc = copy.deepcopy(scheduler)
+            greedy2(sc, pp=npm1+1)
+            # print(f'greedy2_{npm1+1}')
+            # plot(sc)
+            if max(host.finish_time for host in sc.hosts) < finish_time:
+                best = (sc, f'greedy2_{npm1+1}')
+                finish_time = max(host.finish_time for host in sc.hosts)
+                
         return best
 
     best_rs, _type = schedule(rs)
     
 
     # best_rs.outputSolutionFromBlock()
-    best_rs.outputSolutionFromCore()
+    # best_rs.outputSolutionFromCore()
     print('>' * 10, 'OPT scheduler:', _type, '<' * 10)
     plot(best_rs)
 
