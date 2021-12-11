@@ -171,6 +171,8 @@ def greedy_trans(rs: ResourceScheduler, max_allowed_core=2):
 
         finish_time_now = max(used_cores,
                               key=lambda core: core.finish_time).finish_time
+        for core in used_cores:
+            core.finish_time = finish_time_now
 
         # update job finish
         job.finish_time = finish_time_now

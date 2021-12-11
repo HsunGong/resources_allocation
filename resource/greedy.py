@@ -67,6 +67,9 @@ def greedy2(rs: ResourceScheduler, pp=5):
 
             finish_time_now = max(
                 used_cores, key=lambda core: core.finish_time).finish_time
+            
+            for core in used_cores:
+                core.finish_time = finish_time_now
 
             # update job finish
             job.finish_time = finish_time_now
