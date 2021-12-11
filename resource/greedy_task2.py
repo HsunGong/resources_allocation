@@ -181,24 +181,38 @@ def greedy_trans(rs: ResourceScheduler, max_allowed_core=2):
             _hid = core.hostid
             rs.hosts[_hid].finish_time = max(rs.hosts[_hid].finish_time,
                                              finish_time_now)
+    
+    for host in rs.hosts:
+        for core in host.cores:
+            # print(core)
+            pass
+    
     # 把所有传输的时间放到最前面。
     for host in rs.hosts:
         for core in host.cores:
-            # accum_trans_time = 0
+            accum_trans = 0
             for i in range(len(core.blocks)-1,0,-1): # index base is 0, [n-1,1]
+                # print(core)
+                # print(core.blocks[i])
                 if core.blocks[i].jobid == core.blocks[i - 1].jobid:
                     cur_tras_time = core.blocks[i].start_time - core.blocks[i - 1].end_time
                     core.blocks[i - 1].start_time = core.blocks[i - 1].start_time + cur_tras_time
                     core.blocks[i - 1].end_time = core.blocks[i].start_time
-                    # accum_trans_time += cur_tras_time
+                    accum_trans += core.blocks[i].transmission
                 else:
-                    last_jobid = core.blocks[i-1].jobid
-                    print(rs.jobs[last_jobid].finish_time, 
-                        core.blocks[i].start_time)
+                    accum_trans += core.blocks[i].transmission
                     core.transmission.append((
-                        rs.jobs[last_jobid].finish_time, 
+                        core.blocks[i].start_time - accum_trans,
                         core.blocks[i].start_time
                         ))
+                    accum_trans = 0
+
+            if len(core.blocks) != 0:
+                accum_trans += core.blocks[0].transmission
+                core.transmission.append((
+                    core.blocks[0].start_time - accum_trans, 
+                    core.blocks[0].start_time
+                    ))
 
 
 def single_core(rs):

@@ -26,6 +26,7 @@ class Block:
         self.rank = 0
         self.start_time = np.inf
         self.end_time = np.inf
+        self.transmission = 0
 
     def __repr__(self) -> str:
         return f"H[{self.host}] J{self.jobid}-B{self.blockid} D({self.data}) T({self.start_time:.1f}-{self.end_time:.1f}) H({self.hostid})/C({self.coreid})"
@@ -66,6 +67,7 @@ class Core:
         # Core perspective: host->core->task-> <job,block,startTime,endTime>
         # [num_host, num_core, task(job, block)]
         self.blocks: List[Block] = []
+        self.transmission = []
 
     def add_block(self, block: Block, add_finish_time, transmission_time=0):
         """
@@ -75,13 +77,14 @@ class Core:
         block.start_time = self.finish_time + transmission_time
         self.finish_time += add_finish_time + transmission_time
         block.end_time = self.finish_time
+        block.transmission = transmission_time
 
         block.coreid = self.coreid
         block.hostid = self.hostid
         self.blocks.append(block)
 
     def __repr__(self) -> str:
-        return f"H({self.hostid}) C({self.coreid}) F({self.finish_time})"
+        return f"H({self.hostid}) C({self.coreid}) F({self.finish_time:.1f})"
 
 
 class Host:
@@ -96,6 +99,7 @@ class Host:
         self.cores:List[Core] = [Core(self.hostid, idx + self.prev_core) for idx in range(self.num_core)]
         for core in self.cores:
             core.init()
+
     def __repr__(self) -> str:
         return f"H({self.hostid}) N({self.num_core})"
 
@@ -326,9 +330,10 @@ if __name__ == "__main__":
 
         return best, finish_time
     random.seed(10)
-    from utils import generator
-    generator(rs, args.task, numJob=50, numBlock=(20,80), numCore=(20,30))
-    print(f'Generate random testcase.')
+    # from utils import generator
+    # # generator(rs, args.task, numJob=50, numBlock=(20,80), numCore=(20,30))
+    # generator(rs, args.task, numJob=50, numBlock=(20,80), numCore=(10,15))
+    # print(f'Generate random testcase.')
 
     if args.task == 1:
         (best_rs, _type), finish_time = schedule_task1(rs)

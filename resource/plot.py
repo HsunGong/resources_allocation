@@ -2,10 +2,11 @@ from typing import List
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.colors as mcolors
-
+import random
 def plot(scheduler):
-    # COLOR_TABLE = plt.get_cmap('RdYlGn')(np.linspace(0.15, 0.85, scheduler.numJob))
-    COLOR_TABLE = list(reversed(mcolors.XKCD_COLORS.values()))
+    # COLOR_TABLE = plt.get_cmap('gist_rainbow')(np.linspace(0, 1.0, scheduler.numJob))
+    COLOR_TABLE = list(mcolors.XKCD_COLORS.values())
+    # random.shuffle(COLOR_TABLE)
 
     y_labels = []
     for host in scheduler.hosts:
@@ -29,13 +30,24 @@ def plot(scheduler):
 
     for job in scheduler.jobs:
         plot_job(job)
+    for host in scheduler.hosts:
+        for core in host.cores:
+            for (trans_start, trans_end) in core.transmission:
+                ax.barh(y=core.coreid,# compute_yaxis(blk.hostid, blk.coreid - scheduler.hosts[blk.hostid].prev_core),
+                        left=trans_start,
+                        width=trans_end - trans_start,
+                        linestyle="dotted",
+                        color="#54545430",
+                        label="-1", # label the transmission
+                        edgecolor='k')
 
     ax.set_yticks(np.arange(len(y_labels)), labels=y_labels)
     ax.invert_yaxis()
     ax.set_xlabel('Time')
     ax.set_title('Visualization of running')
     # ax.legend(ncol=scheduler.numJob, bbox_to_anchor=(0, 1), labels=[i for i in range(scheduler.numJob)],
-            #   loc='upper left', fontsize='small')
+    #           loc='upper left', fontsize='small')
     # plt.legend(ncol=10,handles=handles[:], loc='upper left', fontsize='small', bbox_to_anchor=(0, -0.2))
     plt.tight_layout()
     plt.savefig(f'1.pdf')
+    plt.show()
