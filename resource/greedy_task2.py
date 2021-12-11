@@ -1,11 +1,13 @@
 import random
 from typing import List
 import numpy as np
+from resource.greedy import shortest_end_time
 from resource.plot import plot
 
 from resource.run import ResourceScheduler, Job, Host, Core, Block, list2int
 
 global transmission_speed
+
 
 def multi_time_schedule(times: List[int], num_cores: int):
     finish_time_per_core = [0] * num_cores
@@ -17,11 +19,13 @@ def multi_time_schedule(times: List[int], num_cores: int):
         core_idx = np.argmin(finish_time_per_core)
         finish_time_per_core[core_idx] += times[i]
         ans_idx[i] = core_idx
-    
+
     return ans_idx
 
+
 def greedy(rs: ResourceScheduler):
-    global transmission_speed;transmission_speed = rs.St
+    global transmission_speed
+    transmission_speed = rs.St
 
     num_block = max(len(job.blocks) for job in rs.jobs)
     num_core = sum(host.num_core for host in rs.hosts)
@@ -29,32 +33,38 @@ def greedy(rs: ResourceScheduler):
     jobids = [i for i in range(rs.numJob)]
     jobids = sorted(
         jobids,
-        key=lambda id: sum(block.data for block in rs.jobs[id].blocks) / rs.jobs[id].speed,
+        key=lambda id: sum(block.data for block in rs.jobs[id].blocks) / rs.
+        jobs[id].speed,
         reverse=True,
-    ) # possible core is different. -> ~~speed
+    )  # possible core is different. -> ~~speed
 
     for jid in jobids:
         job = rs.jobs[jid]
         accum_core = 0
         all_used = []
-        
+
         max_start_time = 0
         for host in rs.hosts:
-            block_in_host = list(filter(lambda block: host.hostid == block.host, job.blocks))
+            block_in_host = list(
+                filter(lambda block: host.hostid == block.host, job.blocks))
             # print(f"Job{jid} has {block_in_host} block in host {host}")
-            print(host, [block.host for block in job.blocks],)
+            print(
+                host,
+                [block.host for block in job.blocks],
+            )
             if len(block_in_host) == 0: continue
-            
+
             num_core = min(host.num_core, len(block_in_host))
             accum_core += num_core
 
-            used_cores = sorted(host.cores, key=lambda core: core.finish_time)[:num_core]
+            used_cores = sorted(host.cores,
+                                key=lambda core: core.finish_time)[:num_core]
             print(f"Job{jid} use: {used_cores}")
             start_time = used_cores[-1].finish_time
             max_start_time = max(start_time, max_start_time)
 
             all_used.append([host, used_cores])
-        
+
         # Sync Start Time
         for host, used_cores in all_used:
             for core in used_cores:
@@ -65,9 +75,10 @@ def greedy(rs: ResourceScheduler):
         speed = job.speed * (1 - rs.alpha * (accum_core - 1))
 
         for host, used_cores in all_used:
-            block_in_host = list(filter(lambda block: host.hostid == block.host, job.blocks))
+            block_in_host = list(
+                filter(lambda block: host.hostid == block.host, job.blocks))
             if len(block_in_host) == 0: continue
-            
+
             num_core = min(host.num_core, len(block_in_host))
             # estimate end time
             for block in block_in_host:
@@ -78,16 +89,16 @@ def greedy(rs: ResourceScheduler):
 
                 # finish_time --> core.finish_time + block.data / speed
                 core.add_block(block, add_finish_time=block.data / speed)
-        
+
         finish_time_now = 0
         for _, cores in all_used:
             for core in cores:
                 finish_time_now = max(finish_time_now, core.finish_time)
-        
+
         for _, cores in all_used:
             for core in cores:
                 core.finish_time = finish_time_now
-        for host,_ in all_used:
+        for host, _ in all_used:
             host.finish_time = max(host.finish_time, finish_time_now)
         # update job finish
         job.finish_time = finish_time_now
@@ -95,7 +106,8 @@ def greedy(rs: ResourceScheduler):
 
 
 def greedy_trans(rs: ResourceScheduler, max_allowed_core=2):
-    global transmission_speed;transmission_speed = rs.St
+    global transmission_speed
+    transmission_speed = rs.St
 
     num_block = max(len(job.blocks) for job in rs.jobs)
     # num_core = sum(host.num_core for host in rs.hosts)
@@ -103,50 +115,71 @@ def greedy_trans(rs: ResourceScheduler, max_allowed_core=2):
     jobids = [i for i in range(rs.numJob)]
     jobids = sorted(
         jobids,
-        key=lambda id: sum(block.data for block in rs.jobs[id].blocks) / rs.jobs[id].speed,
+        key=lambda id: sum(block.data for block in rs.jobs[id].blocks) / rs.
+        jobs[id].speed,
         reverse=True,
-    ) # possible core is different. -> ~~speed
+    )  # possible core is different. -> ~~speed
 
     all_cores = []
     for host in rs.hosts:
         all_cores.extend(host.cores)
 
+    num_jobs, num_core = len(jobids), min(len(all_cores), max_allowed_core)
+    end_time = np.zeros((num_jobs, num_core + 1))
+    bubbles = np.zeros_like(end_time)
+    end_time_coreid = np.zeros((num_jobs, num_block, num_core + 1))
+    for i in range(num_jobs):
+        for j in range(1, num_core + 1):
+            end_time[i][j], bubbles[i][j] = shortest_end_time(
+                rs, i, rs.jobs[i], j, end_time_coreid)
+
     for jid in jobids:
         job = rs.jobs[jid]
-        max_core = min(len(job.blocks), len(all_cores), max_allowed_core) # max core = 3
+        # XXX
+        max_core = min(
+            len(job.blocks), len(all_cores), 
+            np.argmin(end_time[jid][1:]) + 1,
+            max_allowed_core)  # max core = 3
         block_by_host = [0 for _ in rs.hosts]
         for block in job.blocks:
             block_by_host[block.host] += block.data
 
         # penalty is : if data is large in this host, the core has high priority
-        used_cores = sorted(
-            all_cores, 
-            key=lambda core:core.finish_time - block_by_host[core.hostid] / transmission_speed
-            )[:max_core]
+        used_cores = sorted(all_cores,
+                            key=lambda core: core.finish_time 
+                            # - block_by_host[core.hostid] / transmission_speed
+                                )[:max_core]
         used_hostids = set(core.hostid for core in used_cores)
         speed = job.speed * (1 - rs.alpha * (len(used_cores) - 1))
-        
-        # Sync Start Time
-        start_time = max(used_cores, key=lambda core: core.finish_time).finish_time
-        for core in used_cores: core.finish_time = start_time
 
-        blocks = sorted(job.blocks, key=lambda block: block.data / speed)
+        # Sync Start Time
+        start_time = max(used_cores,
+                         key=lambda core: core.finish_time).finish_time
+        for core in used_cores:
+            core.finish_time = start_time
+
+        blocks = sorted(job.blocks, key=lambda block: block.data / speed, reverse=True)
         for block in blocks:
             # assign block -> min finish core
-            core = min(used_cores, key=lambda core: core.finish_time)
-            core.add_block(block, block.data / speed, block.data / transmission_speed)
-        
+            # XXX: 考虑下传输
+            core = min(used_cores,
+                       key=lambda core: core.finish_time 
+                    #    + block.data / transmission_speed if core.hostid != block.host else 0
+            )
+            core.add_block(block, block.data / speed,
+                           block.data / transmission_speed)
 
-        finish_time_now = max(
-            used_cores, key=lambda core: core.finish_time).finish_time
+        finish_time_now = max(used_cores,
+                              key=lambda core: core.finish_time).finish_time
 
         # update job finish
         job.finish_time = finish_time_now
         # update host finish
         for core in used_cores:
             _hid = core.hostid
-            rs.hosts[_hid].finish_time = max(rs.hosts[_hid].finish_time, finish_time_now)
-    
+            rs.hosts[_hid].finish_time = max(rs.hosts[_hid].finish_time,
+                                             finish_time_now)
+    # 把所有传输的时间放到最前面。
     for host in rs.hosts:
         for core in host.cores:
             i = len(core.blocks) - 1
@@ -154,11 +187,12 @@ def greedy_trans(rs: ResourceScheduler, max_allowed_core=2):
                 if i <= 0:
                     break
                 if i >= 1 and core.blocks[i].jobid == core.blocks[i - 1].jobid:
-                    core.blocks[i-1].start_time = core.blocks[i-1].start_time + core.blocks[i].start_time - core.blocks[i-1].end_time
-                    core.blocks[i-1].end_time = core.blocks[i].start_time
+                    core.blocks[i - 1].start_time = core.blocks[
+                        i - 1].start_time + core.blocks[
+                            i].start_time - core.blocks[i - 1].end_time
+                    core.blocks[i - 1].end_time = core.blocks[i].start_time
                 i = i - 1
 
-           
 
 def single_core(rs):
     """
@@ -188,12 +222,13 @@ def single_core(rs):
     num_host_in = np.zeros(num_host)
     for i in range(len(rs.hosts)):
         #print(rs.hosts[i].cores)
-        num_host_in[i] = len(rs.hosts[i].cores) #record each host's corenum
-    finish_time_per_core = np.zeros(( num_host, sum(len(host.cores) for host in rs.hosts))) 
-    exist_in_host = np.zeros((len(rs.jobs) , num_host))
+        num_host_in[i] = len(rs.hosts[i].cores)  #record each host's corenum
+    finish_time_per_core = np.zeros(
+        (num_host, sum(len(host.cores) for host in rs.hosts)))
+    exist_in_host = np.zeros((len(rs.jobs), num_host))
     ans_host_idx = [-1] * len(job_time_single_core)
     ans_core_idx = [-1] * len(job_time_single_core)
-    
+
     time_idx_sorted = list(reversed(np.argsort(job_time_single_core)))
 
     for i in time_idx_sorted:

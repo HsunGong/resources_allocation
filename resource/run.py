@@ -279,7 +279,7 @@ if __name__ == "__main__":
             numCore += len(h.cores)
         print(numCore)
         
-        for npm1 in range(1, numCore):
+        for npm1 in range(1, min(7, numCore)+1):
             sc = copy.deepcopy(scheduler)
             greedy2(sc, pp=npm1+1)
             # print(f'greedy2_{npm1+1}')
@@ -315,9 +315,9 @@ if __name__ == "__main__":
                     finish_time = max(host.finish_time for host in sc.hosts)
 
         return best, finish_time
-    
+    # random.seed(103)
     from utils import generator
-    generator(rs, args.task, numJob=40, numBlock=(20,80), numCore=(20,30))
+    generator(rs, args.task, numJob=50, numBlock=(20,80), numCore=(20,30))
     print(f'Generate random testcase.')
 
     if args.task == 1:
