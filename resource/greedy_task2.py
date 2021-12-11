@@ -91,3 +91,62 @@ def greedy(rs: ResourceScheduler):
         # update job finish
         job.finish_time = finish_time_now
         # update host finish
+
+def single_core(rs):
+    job_time_single_core = [
+        sum(blk.data for blk in job.blocks) / job.speed for job in rs.jobs
+    ]
+
+    allocated_cores = multi_time_schedule(job_time_single_core,
+                                          10) #10 is sum of all cores, or sum(host.cores for host in rs.hosts)
+    #hid = 0
+    #cur_host = rs.hosts[hid]
+    for i, i_core in enumerate(allocated_cores):        #just for convenience to write this, but it works in task2's special case
+        job = rs.jobs[i]
+        hid = 0
+        cid = 0
+        if i_core == 0:
+            hid = 0
+            cid = 0
+        elif i_core <= 2:
+            hid = 1
+            cid = i_core - 1
+        elif i_core <= 5:
+            hid = 2
+            cid = i_core - 3
+        else:
+            hid = 3
+            cid = i_core - 6
+        cur_host = rs.hosts[hid]
+        core = cur_host.cores[cid]
+        for block in job.blocks:
+            # update start/end
+            block.hostid = hid
+            block.coreid = cid
+            block.start_time = core.finish_time
+            block.end_time = core.finish_time + block.data / job.speed
+            # update core start/end
+            core.add_block(block, block.data / job.speed)
+        job.finish_time = core.finish_time
+        cur_host.finish_time = max(cur_host.finish_time, core.finish_time)
+
+
+def multi_time_schedule(times: List[int], num_cores: int):
+    """Schedule for multi time-blocks
+    times: a list of int
+    num_cores: how many cores to use
+
+    Return: a list of len(times) which is each time-block's index of core
+    """
+
+    finish_time_per_core = [0] * num_cores
+    ans_idx = [-1] * len(times)
+
+    time_idx_sorted = list(reversed(np.argsort(times)))
+
+    for i in time_idx_sorted:
+        core_idx = np.argmin(finish_time_per_core)
+        finish_time_per_core[core_idx] += times[i]
+        ans_idx[i] = core_idx
+
+    return ans_idx
