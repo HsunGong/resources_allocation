@@ -151,7 +151,7 @@ def greedy_trans(rs: ResourceScheduler, max_allowed_core=2):
         for core in host.cores:
             i = len(core.blocks) - 1
             while True:
-                if i == 0:
+                if i <= 0:
                     break
                 if i >= 1 and core.blocks[i].jobid == core.blocks[i - 1].jobid:
                     core.blocks[i-1].start_time = core.blocks[i-1].start_time + core.blocks[i].start_time - core.blocks[i-1].end_time
