@@ -94,7 +94,7 @@ def greedy(rs: ResourceScheduler):
         # update host finish
 
 
-def greedy_trans(rs: ResourceScheduler):
+def greedy_trans(rs: ResourceScheduler, max_allowed_core=2):
     global transmission_speed;transmission_speed = rs.St
 
     num_block = max(len(job.blocks) for job in rs.jobs)
@@ -113,7 +113,7 @@ def greedy_trans(rs: ResourceScheduler):
 
     for jid in jobids:
         job = rs.jobs[jid]
-        max_core = min(len(job.blocks), len(all_cores), 2) # max core = 3
+        max_core = min(len(job.blocks), len(all_cores), max_allowed_core) # max core = 3
         block_by_host = [0 for _ in rs.hosts]
         for block in job.blocks:
             block_by_host[block.host] += block.data
