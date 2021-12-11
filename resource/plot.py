@@ -36,6 +36,6 @@ def plot(scheduler):
     ax.set_title('Visualization of running')
     # ax.legend(ncol=scheduler.numJob, bbox_to_anchor=(0, 1), labels=[i for i in range(scheduler.numJob)],
             #   loc='upper left', fontsize='small')
-    plt.legend(ncol=10,handles=handles[:], loc='upper left', fontsize='small', bbox_to_anchor=(0, -0.2))
+    # plt.legend(ncol=10,handles=handles[:], loc='upper left', fontsize='small', bbox_to_anchor=(0, -0.2))
     plt.tight_layout()
-    plt.show()
+    plt.savefig(f'1.pdf')
