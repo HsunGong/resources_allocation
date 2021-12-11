@@ -42,6 +42,7 @@ def greedy(rs: ResourceScheduler):
         for host in rs.hosts:
             block_in_host = list(filter(lambda block: host.hostid == block.host, job.blocks))
             # print(f"Job{jid} has {block_in_host} block in host {host}")
+            print(host, [block.host for block in job.blocks],)
             if len(block_in_host) == 0: continue
             
             num_core = min(host.num_core, len(block_in_host))

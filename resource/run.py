@@ -233,7 +233,7 @@ if __name__ == "__main__":
     rs = ResourceScheduler(args.task, file_in)
 
     from utils import generator
-    generator(rs, args.task, numJob=15, numBlock=80, numCore=30)
+    generator(rs, args.task, numJob=15, numBlock=(20,80), numCore=(20,30))
     print(f'Generate random testcase.')
 
     def schedule_task1(scheduler):
