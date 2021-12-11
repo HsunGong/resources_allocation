@@ -285,19 +285,25 @@ if __name__ == "__main__":
         finish_time = np.inf
         for _type in ["greedy_trans"]:
             if _type == "greedy_trans":
-                kwargs = dict()
-                kwargs["max_allowed_core"] = 7
+                for max_core in range(1, 14):
+                    kwargs = {"max_allowed_core": max_core}
+                    sc = copy.deepcopy(scheduler)
+                    eval(_type)(sc, **kwargs)
+                    if max(host.finish_time for host in sc.hosts) < finish_time:
+                        best = (sc, f'{_type}_{max_core}')
+                        finish_time = max(host.finish_time for host in sc.hosts)
+            else:
         # for _type in ["single_core","greedy"]:
-            sc = copy.deepcopy(scheduler)
-            eval(_type)(sc, **kwargs)
-            if max(host.finish_time for host in sc.hosts) < finish_time:
-                best = (sc, _type)
-                finish_time = max(host.finish_time for host in sc.hosts)
+                sc = copy.deepcopy(scheduler)
+                eval(_type)(sc, **kwargs)
+                if max(host.finish_time for host in sc.hosts) < finish_time:
+                    best = (sc, _type)
+                    finish_time = max(host.finish_time for host in sc.hosts)
 
         return best, finish_time
     
     from utils import generator
-    generator(rs, args.task, numJob=55, numBlock=(20,80), numCore=(20,30))
+    generator(rs, args.task, numJob=40, numBlock=(20,80), numCore=(20,30))
     print(f'Generate random testcase.')
 
     if args.task == 1:
