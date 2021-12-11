@@ -19,8 +19,10 @@ def generator(rs: ResourceScheduler, task, numJob=3, numCore=4, numBlock=5):
     speed_range = [i for i in range(20, 80)]
 
     hosts = []
+    prev = 0
     for idx, num_core in enumerate(random.choices(core_range, k=rs.numHost)):
-        hosts.append(Host(hostid=idx, num_core=num_core))
+        hosts.append(Host(hostid=idx, num_core=num_core, prev_core=prev))
+        prev += num_core
     rs.hosts = hosts
 
     jobs = []

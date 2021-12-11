@@ -273,11 +273,12 @@ if __name__ == "__main__":
     def schedule_task2(scheduler):
         # NOTE: block.hostid/coreid
         # NOTE: block.start_time/end_time
-        from resource.greedy_task2 import greedy
+        from resource.greedy_task2 import greedy,single_core
 
         best = None
         finish_time = np.inf
-        for _type in ["greedy"]:
+        for _type in ["single_core","greedy"]:
+        # for _type in ["single_core","greedy"]:
             sc = copy.deepcopy(scheduler)
             eval(_type)(sc)
             if max(host.finish_time for host in sc.hosts) < finish_time:
