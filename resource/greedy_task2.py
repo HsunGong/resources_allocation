@@ -113,7 +113,7 @@ def greedy_trans(rs: ResourceScheduler):
 
     for jid in jobids:
         job = rs.jobs[jid]
-        max_core = min(len(job.blocks), len(all_cores), 3) # max core = 3
+        max_core = min(len(job.blocks), len(all_cores), 2) # max core = 3
         block_by_host = [0 for _ in rs.hosts]
         for block in job.blocks:
             block_by_host[block.host] += block.data
