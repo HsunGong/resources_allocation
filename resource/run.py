@@ -322,7 +322,7 @@ if __name__ == "__main__":
                     finish_time = max(host.finish_time for host in sc.hosts)
 
         return best, finish_time
-    # random.seed(103)
+    random.seed(0)
     from utils import generator
     generator(rs, args.task, numJob=50, numBlock=(20,80), numCore=(20,30))
     print(f'Generate random testcase.')
