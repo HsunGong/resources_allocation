@@ -178,6 +178,7 @@ class ResourceScheduler:
 
     def outputSolutionFromBlock(self):
         from collections import Counter
+        global sum_job_time
         print("Task2 Solution (Block Perspective) of Teaching Assistant:")
         for host in self.hosts:
             for core in host.cores:
@@ -186,32 +187,30 @@ class ResourceScheduler:
         for job in self.jobs:
             result = Counter(block.coreid for block in job.blocks)
             job.used_cores = len(result)
+            g = 1 - self.alpha * (job.used_cores - 1)
+            job.speed = g * job.speed
             #print(job.used_cores)
             print(
                 f"Job {job.jobid} obtains {job.used_cores} cores (speed={job.speed})"
                 f"and finishes at time {job.finish_time}:")
             for block in job.blocks:
                 # TODO: computation???
-                speed = block.data / job.speed * 1  #if job.finished == 1 else self.speed(core=len(job.blocks))
+                time = block.data / job.speed * 1  #if job.finished == 1 else self.speed(core=len(job.blocks))
+                sum_job_time += time
                 print(
-                    f"Block{block.blockid}: H{block.hostid}, C{block.coreid}, R{block.rank}(time={speed:.2f}),"
+                    f"Block{block.blockid}: H{block.hostid}, C{block.coreid}, R{block.rank}(time={time:.2f}),"
                 )
         print("The maximum finish time:",
               max(job.finish_time for job in self.jobs))
         print("The total response time:",
               sum(job.finish_time for job in self.jobs))
-        print(
-            "Utilization rate:",
-            sum(job.finish_time
-                for job in self.jobs) / sum(host.finish_time
-                                            for host in self.hosts),
-        )
 
     def outputSolutionFromCore(self):
         print("Task2 Solution (Core Perspective) of Teaching Assistant:")
         max_host_time = 0
         total_time = 0
-        
+        #sum_job_time = 0
+        sum_core_time = 0
         for host in self.hosts:
             host.finish_time = 0
             for core in host.cores:
@@ -221,6 +220,7 @@ class ResourceScheduler:
             print(
                 f"Host:{host.hostid} finishes at time {host.finish_time:.2f}:")
             for core in host.cores:
+                sum_core_time += core.finish_time
                 print(
                     f"Core {core.coreid} has {len(core.blocks)} tasks and finishes at time {core.finish_time:.2f}"
                 )
@@ -234,6 +234,10 @@ class ResourceScheduler:
               max(job.finish_time for job in self.jobs))
         print("The total response time:",
               sum(job.finish_time for job in self.jobs))
+        print(
+            "Utilization rate:",
+            sum_job_time / sum_core_time
+        )
 
 
 if __name__ == "__main__":
@@ -248,6 +252,9 @@ if __name__ == "__main__":
         file_in = sys.stdin
     else:
         file_in = open(args.case, "r")
+        
+    global sum_job_time
+    sum_job_time = 0
 
     rs = ResourceScheduler(args.task, file_in)
 
