@@ -93,6 +93,60 @@ def greedy(rs: ResourceScheduler):
         job.finish_time = finish_time_now
         # update host finish
 
+
+def greedy_trans(rs: ResourceScheduler):
+    global transmission_speed;transmission_speed = rs.St
+
+    num_block = max(len(job.blocks) for job in rs.jobs)
+    # num_core = sum(host.num_core for host in rs.hosts)
+
+    jobids = [i for i in range(rs.numJob)]
+    jobids = sorted(
+        jobids,
+        key=lambda id: sum(block.data for block in rs.jobs[id].blocks) / rs.jobs[id].speed,
+        reverse=True,
+    ) # possible core is different. -> ~~speed
+
+    all_cores = []
+    for host in rs.hosts:
+        all_cores.extend(host.cores)
+
+    for jid in jobids:
+        job = rs.jobs[jid]
+        max_core = min(len(job.blocks), len(all_cores), 3) # max core = 3
+        block_by_host = [0 for _ in rs.hosts]
+        for block in job.blocks:
+            block_by_host[block.host] += block.data
+
+        # penalty is : if data is large in this host, the core has high priority
+        used_cores = sorted(
+            all_cores, 
+            key=lambda core:core.finish_time - block_by_host[core.hostid] / transmission_speed
+            )[:max_core]
+        used_hostids = set(core.hostid for core in used_cores)
+        speed = job.speed * (1 - rs.alpha * (len(used_cores) - 1))
+        
+        # Sync Start Time
+        start_time = max(used_cores, key=lambda core: core.finish_time).finish_time
+        for core in used_cores: core.finish_time = start_time
+
+        blocks = sorted(job.blocks, key=lambda block: block.data / speed)
+        for block in blocks:
+            # assign block -> min finish core
+            core = min(used_cores, key=lambda core: core.finish_time)
+            core.add_block(block, block.data / speed, block.data / transmission_speed)
+
+        finish_time_now = max(
+            used_cores, key=lambda core: core.finish_time).finish_time
+
+        # update job finish
+        job.finish_time = finish_time_now
+        # update host finish
+        for core in used_cores:
+            _hid = core.hostid
+            rs.hosts[_hid].finish_time = max(rs.hosts[_hid].finish_time, finish_time_now)
+
+
 def single_core(rs):
     """
     a job use a single core, no parallel

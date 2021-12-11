@@ -54,20 +54,24 @@ class Job:
         return f"Job({self.jobid}) with N-block({self.num_block}) by Speed({self.speed})"
 
 class Core:
-    def __init__(self, hostid, coreid) -> None:
+    def __init__(self, hostid:int, coreid:int) -> None:
         self.hostid = hostid
         self.coreid = coreid
 
     def init(self):
         # host->core->finishTime : [num_host, num_core]
-        self.finish_time = 0
+        self.finish_time = 0.
         # Core perspective: host->core->task-> <job,block,startTime,endTime>
         # [num_host, num_core, task(job, block)]
         self.blocks: List[Block] = []
 
-    def add_block(self, block: Block, add_finish_time):
-        block.start_time = self.finish_time
-        self.finish_time += add_finish_time
+    def add_block(self, block: Block, add_finish_time, transmission_time=0):
+        """
+        block_start_time: transmission_time
+        block/core finish_time = add_finish_time + transmission_time
+        """
+        block.start_time = self.finish_time + transmission_time
+        self.finish_time += add_finish_time + transmission_time
         block.end_time = self.finish_time
 
         block.coreid = self.coreid
@@ -75,7 +79,7 @@ class Core:
         self.blocks.append(block)
 
     def __repr__(self) -> str:
-        return f"H({self.hostid}) C({self.coreid}) F({self.finish_time:.1f})"
+        return f"H({self.hostid}) C({self.coreid}) F({self.finish_time})"
 
 
 class Host:
@@ -233,10 +237,6 @@ if __name__ == "__main__":
 
     rs = ResourceScheduler(args.task, file_in)
 
-    from utils import generator
-    generator(rs, args.task, numJob=15, numBlock=(20,80), numCore=(20,30))
-    print(f'Generate random testcase.')
-
     def schedule_task1(scheduler):
         # NOTE: block.hostid/coreid
         # NOTE: block.start_time/end_time
@@ -279,11 +279,11 @@ if __name__ == "__main__":
     def schedule_task2(scheduler):
         # NOTE: block.hostid/coreid
         # NOTE: block.start_time/end_time
-        from resource.greedy_task2 import greedy,single_core
+        from resource.greedy_task2 import greedy, greedy_trans, single_core
 
         best = None
         finish_time = np.inf
-        for _type in ["single_core","greedy"]:
+        for _type in ["greedy_trans"]:
         # for _type in ["single_core","greedy"]:
             sc = copy.deepcopy(scheduler)
             eval(_type)(sc)
@@ -297,6 +297,10 @@ if __name__ == "__main__":
         (best_rs, _type), finish_time = schedule_task1(rs)
     else:
         (best_rs, _type), finish_time = schedule_task2(rs)
+
+    # from utils import generator
+    # generator(rs, args.task, numJob=15, numBlock=(20,80), numCore=(20,30))
+    # print(f'Generate random testcase.')
 
     print(_type, finish_time)
     # best_rs.outputSolutionFromBlock()
