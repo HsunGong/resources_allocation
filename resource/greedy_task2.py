@@ -135,6 +135,7 @@ def greedy_trans(rs: ResourceScheduler, max_allowed_core=2):
             # assign block -> min finish core
             core = min(used_cores, key=lambda core: core.finish_time)
             core.add_block(block, block.data / speed, block.data / transmission_speed)
+        
 
         finish_time_now = max(
             used_cores, key=lambda core: core.finish_time).finish_time
@@ -145,7 +146,19 @@ def greedy_trans(rs: ResourceScheduler, max_allowed_core=2):
         for core in used_cores:
             _hid = core.hostid
             rs.hosts[_hid].finish_time = max(rs.hosts[_hid].finish_time, finish_time_now)
+    
+    for host in rs.hosts:
+        for core in host.cores:
+            i = len(core.blocks) - 1
+            while True:
+                if i == 0:
+                    break
+                if i >= 1 and core.blocks[i].jobid == core.blocks[i - 1].jobid:
+                    core.blocks[i-1].start_time = core.blocks[i-1].start_time + core.blocks[i].start_time - core.blocks[i-1].end_time
+                    core.blocks[i-1].end_time = core.blocks[i].start_time
+                i = i - 1
 
+           
 
 def single_core(rs):
     """
