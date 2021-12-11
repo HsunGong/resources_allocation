@@ -119,6 +119,7 @@ class ResourceScheduler:
         for idx, num_core in enumerate(list2int(info)):
             self.hosts.append(Host(hostid=idx, num_core=num_core, prev_core=prev_core))
             prev_core += num_core
+        
         assert self.numHost == len(self.hosts)
 
         ###### The number of blocks for each job
@@ -259,7 +260,12 @@ if __name__ == "__main__":
                 finish_time = max(host.finish_time for host in sc.hosts)
             # print(_type)
             # plot(sc)
-        for npm1 in range(1, 15):
+        numCore = 0
+        for h in sc.hosts:
+            numCore += len(h.cores)
+        print(numCore)
+        
+        for npm1 in range(1, numCore):
             sc = copy.deepcopy(scheduler)
             greedy2(sc, pp=npm1+1)
             # print(f'greedy2_{npm1+1}')
