@@ -42,6 +42,7 @@ def greedy(rs: ResourceScheduler):
         for host in rs.hosts:
             block_in_host = list(filter(lambda block: host.hostid == block.host, job.blocks))
             # print(f"Job{jid} has {block_in_host} block in host {host}")
+            print(host, [block.host for block in job.blocks],)
             if len(block_in_host) == 0: continue
             
             num_core = min(host.num_core, len(block_in_host))
@@ -91,3 +92,97 @@ def greedy(rs: ResourceScheduler):
         # update job finish
         job.finish_time = finish_time_now
         # update host finish
+
+def single_core(rs):
+    """
+    a job use a single core, no parallel
+
+    The main change compared to task1 is in the selection of the host
+    only consider the hosts that the block started on , use 
+    exist_in_host[i][j]: to judge whether job i can start at host j
+    num_host_in: to record the core number of each host
+    finish_time_per_core[i][j]:     has changed to record core j in some hosts i, the array can be smaller 
+        (sum(len(host.cores) for host in rs.hosts) to max num_host_in)
+
+    (another way to think is that if the job dont have any block in the earlist core's host, then add the smallest block's transmission time )
+    (this still works beacuse the according to util the max transimission time is 200/500 and the mininal run time is 50/80
+    it is impossible we need to wait for more than 1 block's transimission)
+    """
+
+    job_time_single_core = [
+        sum(blk.data for blk in job.blocks) / job.speed for job in rs.jobs
+    ]
+
+    #allocated_cores = multi_time_schedule(job_time_single_core,
+    #                                      sum(len(host.cores) for host in rs.hosts)) #sum of all cores
+    #hid = 0
+    #cur_host = rs.hosts[hid]
+    num_host = len(rs.hosts)
+    num_host_in = np.zeros(num_host)
+    for i in range(len(rs.hosts)):
+        #print(rs.hosts[i].cores)
+        num_host_in[i] = len(rs.hosts[i].cores) #record each host's corenum
+    finish_time_per_core = np.zeros(( num_host, sum(len(host.cores) for host in rs.hosts))) 
+    exist_in_host = np.zeros((len(rs.jobs) , num_host))
+    ans_host_idx = [-1] * len(job_time_single_core)
+    ans_core_idx = [-1] * len(job_time_single_core)
+    
+    time_idx_sorted = list(reversed(np.argsort(job_time_single_core)))
+
+    for i in time_idx_sorted:
+        for block in rs.jobs[i].blocks:
+            exist_in_host[i][block.host] = True
+        core_idx = 0
+        core_time = np.inf
+        hid = 0
+        for j in range(num_host):
+            if exist_in_host[i][j]:
+                for k in range(int(num_host_in[j])):
+                    if finish_time_per_core[j][k] < core_time:
+                        core_time = finish_time_per_core[j][k]
+                        hid = j
+                        core_idx = k
+        #core_idx = np.argmin(finish_time_per_core)
+        finish_time_per_core[hid][core_idx] += job_time_single_core[i]
+        ans_host_idx[i] = hid
+        ans_core_idx[i] = core_idx
+
+    for i, i_core in enumerate(ans_core_idx):
+        job = rs.jobs[i]
+        hid = ans_host_idx[i]
+        cid = ans_core_idx[i]
+        #print(hid)
+        #print(cid)
+        cur_host = rs.hosts[hid]
+        core = cur_host.cores[cid]
+        for block in job.blocks:
+            # update start/end
+            block.hostid = hid
+            block.coreid = cid
+            block.start_time = core.finish_time
+            block.end_time = core.finish_time + block.data / job.speed
+            # update core start/end
+            core.add_block(block, block.data / job.speed)
+        job.finish_time = core.finish_time
+        cur_host.finish_time = max(cur_host.finish_time, core.finish_time)
+
+
+def multi_time_schedule(times: List[int], num_cores: int):
+    """Schedule for multi time-blocks
+    times: a list of int
+    num_cores: how many cores to use
+
+    Return: a list of len(times) which is each time-block's index of core
+    """
+
+    finish_time_per_core = [0] * num_cores
+    ans_idx = [-1] * len(times)
+
+    time_idx_sorted = list(reversed(np.argsort(times)))
+
+    for i in time_idx_sorted:
+        core_idx = np.argmin(finish_time_per_core)
+        finish_time_per_core[core_idx] += times[i]
+        ans_idx[i] = core_idx
+
+    return ans_idx

@@ -233,7 +233,7 @@ if __name__ == "__main__":
     rs = ResourceScheduler(args.task, file_in)
 
     from utils import generator
-    generator(rs, args.task, numJob=15, numBlock=80, numCore=30)
+    generator(rs, args.task, numJob=15, numBlock=(20,80), numCore=(20,30))
     print(f'Generate random testcase.')
 
     def schedule_task1(scheduler):
@@ -273,11 +273,12 @@ if __name__ == "__main__":
     def schedule_task2(scheduler):
         # NOTE: block.hostid/coreid
         # NOTE: block.start_time/end_time
-        from resource.greedy_task2 import greedy
+        from resource.greedy_task2 import greedy,single_core
 
         best = None
         finish_time = np.inf
-        for _type in ["greedy"]:
+        for _type in ["single_core","greedy"]:
+        # for _type in ["single_core","greedy"]:
             sc = copy.deepcopy(scheduler)
             eval(_type)(sc)
             if max(host.finish_time for host in sc.hosts) < finish_time:
