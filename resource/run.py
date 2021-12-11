@@ -13,15 +13,17 @@ def list2int(l):
 
 
 class Block:
-    def __init__(self, data: int, host: int, blockid: int, jobid: int):
+    def __init__(self, data: int, host: int, blockid: int, jobid: int, rank:int = 0):
         self.blockid = blockid
         self.jobid = jobid
         self.data = data
         self.host = host
+        self.rank = rank
 
     def init(self):
         self.hostid = None
         self.coreid = None
+        self.rank = 0
         self.start_time = np.inf
         self.end_time = np.inf
 
@@ -175,8 +177,16 @@ class ResourceScheduler:
             host.init()
 
     def outputSolutionFromBlock(self):
+        from collections import Counter
         print("Task2 Solution (Block Perspective) of Teaching Assistant:")
+        for host in self.hosts:
+            for core in host.cores:
+                for rank, block in enumerate(core.blocks):
+                    block.rank = rank + 1
         for job in self.jobs:
+            result = Counter(block.coreid for block in job.blocks)
+            job.used_cores = len(result)
+            #print(job.used_cores)
             print(
                 f"Job {job.jobid} obtains {job.used_cores} cores (speed={job.speed})"
                 f"and finishes at time {job.finish_time}:")
@@ -184,7 +194,7 @@ class ResourceScheduler:
                 # TODO: computation???
                 speed = block.data / job.speed * 1  #if job.finished == 1 else self.speed(core=len(job.blocks))
                 print(
-                    f"Block{block.blockid}: H{block.hostid}, C{block.coreid}, R'TODO'(time={speed:.2f}),"
+                    f"Block{block.blockid}: H{block.hostid}, C{block.coreid}, R{block.rank}(time={speed:.2f}),"
                 )
         print("The maximum finish time:",
               max(job.finish_time for job in self.jobs))
@@ -201,8 +211,11 @@ class ResourceScheduler:
         print("Task2 Solution (Core Perspective) of Teaching Assistant:")
         max_host_time = 0
         total_time = 0
-
+        
         for host in self.hosts:
+            host.finish_time = 0
+            for core in host.cores:
+                host.finish_time = max(core.blocks[-1].end_time, host.finish_time)
             max_host_time = max(max_host_time, host.finish_time)
             total_time += host.finish_time
             print(
@@ -215,6 +228,7 @@ class ResourceScheduler:
                     print(
                         f"\tJob {block.jobid} Block {block.blockid}, runTime {block.start_time:.2f} to {block.end_time:.2f}"
                     )
+
 
         print("The maximum finish time:",
               max(job.finish_time for job in self.jobs))
@@ -312,8 +326,8 @@ if __name__ == "__main__":
         (best_rs, _type), finish_time = schedule_task2(rs)
 
     print(_type, finish_time)
-    # best_rs.outputSolutionFromBlock()
-    # best_rs.outputSolutionFromCore()
+    best_rs.outputSolutionFromBlock()
+    best_rs.outputSolutionFromCore()
     print('>' * 10, 'OPT scheduler:', _type, '<' * 10)
     plot(best_rs)
 
