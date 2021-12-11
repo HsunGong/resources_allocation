@@ -209,14 +209,17 @@ class ResourceScheduler:
         print("Task2 Solution (Core Perspective) of Teaching Assistant:")
         max_host_time = 0
         total_time = 0
+        core_num = 0
         #sum_job_time = 0
         sum_core_time = 0
         for host in self.hosts:
             host.finish_time = 0
             for core in host.cores:
+                core_num += 1
+                total_time += core.finish_time
                 host.finish_time = max(core.blocks[-1].end_time, host.finish_time)
             max_host_time = max(max_host_time, host.finish_time)
-            total_time += host.finish_time
+            #total_time += host.finish_time
             print(
                 f"Host:{host.hostid} finishes at time {host.finish_time:.2f}:")
             for core in host.cores:
@@ -236,7 +239,7 @@ class ResourceScheduler:
               sum(job.finish_time for job in self.jobs))
         print(
             "Utilization rate:",
-            sum_job_time / sum_core_time
+              total_time / max_host_time / core_num    #,sum_job_time/ sum_core_time
         )
 
 
