@@ -286,7 +286,7 @@ if __name__ == "__main__":
             numCore += len(h.cores)
         print(numCore)
         
-        for npm1 in range(1, min(7, numCore)+1):
+        for npm1 in range(1, numCore+1):
             sc = copy.deepcopy(scheduler)
             greedy2(sc, pp=npm1+1)
             # print(f'greedy2_{npm1+1}')
