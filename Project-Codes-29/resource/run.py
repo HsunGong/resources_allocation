@@ -330,10 +330,10 @@ if __name__ == "__main__":
 
         return best, finish_time
     random.seed(10)
-    # from utils import generator
-    # # generator(rs, args.task, numJob=50, numBlock=(20,80), numCore=(20,30))
+    from utils import generator
+    generator(rs, args.task, numJob=50, numBlock=(20,80), numCore=(20,30))
     # generator(rs, args.task, numJob=50, numBlock=(20,80), numCore=(10,15))
-    # print(f'Generate random testcase.')
+    print(f'Generate random testcase.')
 
     if args.task == 1:
         (best_rs, _type), finish_time = schedule_task1(rs)

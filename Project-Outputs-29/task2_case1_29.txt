@@ -1,0 +1,341 @@
+Task2 Solution (Block Perspective) of Teaching Assistant:
+Job 0 obtains 2 cores (speed=9.5)and finishes at time 20.70178947368421:
+Block0: H2, C5, R1(time=14.53),
+Block1: H2, C5, R2(time=5.79),
+Block2: H2, C4, R1(time=14.63),
+Job 1 obtains 2 cores (speed=19.0)and finishes at time 31.895836257309938:
+Block0: H3, C9, R11(time=2.68),
+Block1: H3, C9, R9(time=3.00),
+Block2: H3, C9, R10(time=2.74),
+Block3: H3, C8, R9(time=6.79),
+Job 2 obtains 2 cores (speed=28.5)and finishes at time 26.626631578947368:
+Block0: H3, C7, R7(time=3.02),
+Block1: H3, C6, R7(time=2.98),
+Block2: H3, C6, R6(time=4.67),
+Block3: H3, C7, R8(time=2.49),
+Block4: H3, C7, R6(time=4.18),
+Job 3 obtains 2 cores (speed=38.0)and finishes at time 29.479684210526315:
+Block0: H2, C5, R4(time=2.42),
+Block1: H2, C5, R5(time=2.26),
+Block2: H2, C5, R3(time=2.97),
+Block3: H2, C4, R4(time=2.08),
+Block4: H2, C4, R3(time=2.42),
+Block5: H2, C4, R2(time=3.66),
+Job 4 obtains 2 cores (speed=47.5)and finishes at time 23.154783625730992:
+Block0: H3, C8, R8(time=2.38),
+Block1: H3, C8, R7(time=2.42),
+Block2: H3, C9, R5(time=2.69),
+Block3: H3, C8, R6(time=3.09),
+Block4: H3, C9, R6(time=2.55),
+Block5: H3, C9, R8(time=1.96),
+Block6: H3, C9, R7(time=2.42),
+Job 5 obtains 2 cores (speed=57.0)and finishes at time 34.48326315789473:
+Block0: H3, C6, R10(time=1.49),
+Block1: H3, C7, R10(time=2.14),
+Block2: H3, C6, R9(time=1.79),
+Block3: H3, C6, R8(time=2.60),
+Block4: H3, C7, R12(time=1.21),
+Block5: H3, C7, R9(time=2.40),
+Block6: H3, C7, R11(time=1.26),
+Block7: H3, C6, R11(time=1.18),
+Job 6 obtains 2 cores (speed=66.5)and finishes at time 37.12956390977443:
+Block0: H2, C4, R8(time=0.84),
+Block1: H2, C5, R8(time=1.34),
+Block2: H2, C4, R5(time=2.23),
+Block3: H2, C4, R6(time=1.55),
+Block4: H2, C5, R9(time=1.04),
+Block5: H2, C4, R7(time=1.29),
+Block6: H2, C4, R9(time=0.84),
+Block7: H2, C5, R6(time=2.12),
+Block8: H2, C5, R7(time=1.61),
+Job 7 obtains 2 cores (speed=76.0)and finishes at time 39.71353110047848:
+Block0: H1, C2, R12(time=1.29),
+Block1: H1, C2, R13(time=1.08),
+Block2: H2, C3, R12(time=1.00),
+Block3: H1, C2, R11(time=1.75),
+Block4: H2, C3, R13(time=0.97),
+Block5: H1, C2, R14(time=0.96),
+Block6: H1, C2, R15(time=0.84),
+Block7: H2, C3, R14(time=0.91),
+Block8: H2, C3, R11(time=1.47),
+Block9: H2, C3, R10(time=1.59),
+Job 8 obtains 2 cores (speed=85.5)and finishes at time 41.63252631578946:
+Block0: H3, C7, R16(time=0.71),
+Block1: H3, C6, R16(time=0.63),
+Block2: H3, C6, R13(time=1.46),
+Block3: H3, C7, R14(time=1.53),
+Block4: H3, C6, R17(time=0.58),
+Block5: H3, C6, R12(time=1.71),
+Block6: H3, C7, R13(time=1.57),
+Block7: H3, C7, R15(time=1.22),
+Block8: H3, C7, R17(time=0.63),
+Block9: H3, C6, R15(time=0.83),
+Block10: H3, C6, R14(time=0.89),
+Job 9 obtains 2 cores (speed=95.0)and finishes at time 44.05661654135338:
+Block0: H2, C4, R14(time=0.75),
+Block1: H2, C4, R13(time=0.89),
+Block2: H2, C5, R12(time=1.01),
+Block3: H2, C5, R11(time=1.12),
+Block4: H2, C4, R12(time=0.99),
+Block5: H2, C5, R10(time=1.14),
+Block6: H2, C4, R10(time=1.58),
+Block7: H2, C5, R14(time=0.89),
+Block8: H2, C4, R11(time=1.08),
+Block9: H2, C4, R15(time=0.53),
+Block10: H2, C5, R13(time=0.97),
+Block11: H2, C5, R15(time=0.62),
+Job 10 obtains 2 cores (speed=14.25)and finishes at time 39.26343859649123:
+Block0: H1, C1, R2(time=7.51),
+Block1: H0, C0, R4(time=5.47),
+Block2: H0, C0, R1(time=9.75),
+Block3: H1, C1, R1(time=8.28),
+Block4: H1, C1, R5(time=5.33),
+Block5: H0, C0, R2(time=7.09),
+Block6: H1, C1, R4(time=5.54),
+Block7: H1, C1, R3(time=6.39),
+Block8: H0, C0, R3(time=6.32),
+Block9: H1, C1, R6(time=4.77),
+Block10: H0, C0, R5(time=4.84),
+Block11: H0, C0, R6(time=4.70),
+Job 11 obtains 2 cores (speed=23.75)and finishes at time 24.787157894736843:
+Block0: H1, C2, R3(time=4.04),
+Block1: H1, C2, R1(time=6.19),
+Block2: H1, C2, R2(time=4.67),
+Block3: H1, C2, R4(time=3.20),
+Block4: H1, C2, R5(time=2.82),
+Block5: H2, C3, R5(time=2.74),
+Block6: H2, C3, R3(time=4.04),
+Block7: H2, C3, R4(time=3.07),
+Block8: H2, C3, R2(time=5.22),
+Block9: H1, C2, R6(time=2.74),
+Block10: H2, C3, R1(time=6.02),
+Job 12 obtains 2 cores (speed=33.25)and finishes at time 16.39042105263158:
+Block0: H3, C6, R1(time=4.45),
+Block1: H3, C7, R2(time=3.88),
+Block2: H3, C7, R3(time=3.10),
+Block3: H3, C6, R5(time=1.74),
+Block4: H3, C7, R5(time=1.74),
+Block5: H3, C6, R3(time=3.19),
+Block6: H3, C7, R4(time=2.71),
+Block7: H3, C7, R1(time=3.94),
+Block8: H3, C6, R2(time=3.37),
+Block9: H3, C6, R4(time=1.89),
+Job 13 obtains 2 cores (speed=42.75)and finishes at time 12.619730994152047:
+Block0: H3, C8, R4(time=1.61),
+Block1: H3, C9, R2(time=3.09),
+Block2: H3, C8, R1(time=3.37),
+Block3: H3, C9, R1(time=3.23),
+Block4: H3, C8, R5(time=1.54),
+Block5: H3, C8, R3(time=2.32),
+Block6: H3, C9, R3(time=2.11),
+Block7: H3, C8, R2(time=2.78),
+Block8: H3, C9, R4(time=1.85),
+Job 14 obtains 2 cores (speed=52.25)and finishes at time 32.862162679425836:
+Block0: H1, C2, R9(time=1.30),
+Block1: H1, C2, R8(time=1.88),
+Block2: H2, C3, R9(time=1.13),
+Block3: H2, C3, R8(time=1.55),
+Block4: H2, C3, R7(time=2.09),
+Block5: H1, C2, R10(time=1.17),
+Block6: H1, C2, R7(time=2.83),
+Block7: H2, C3, R6(time=2.55),
+Job 15 obtains 2 cores (speed=61.75)and finishes at time 39.35551237067027:
+Block0: H3, C9, R13(time=2.01),
+Block1: H3, C8, R10(time=2.27),
+Block2: H3, C9, R12(time=2.04),
+Block3: H3, C9, R14(time=1.38),
+Block4: H3, C8, R12(time=1.39),
+Block5: H3, C9, R15(time=1.21),
+Block6: H3, C8, R11(time=1.78),
+Job 16 obtains 2 cores (speed=71.25)and finishes at time 44.891754385964916:
+Block0: H1, C1, R9(time=1.47),
+Block1: H0, C0, R8(time=1.59),
+Block2: H0, C0, R9(time=0.87),
+Block3: H1, C1, R7(time=1.74),
+Block4: H0, C0, R7(time=1.94),
+Block5: H1, C1, R8(time=1.71),
+Job 17 obtains 2 cores (speed=80.75)and finishes at time 43.482113143822126:
+Block0: H1, C2, R16(time=1.76),
+Block1: H1, C2, R17(time=0.90),
+Block2: H2, C3, R16(time=1.03),
+Block3: H2, C3, R17(time=0.74),
+Block4: H2, C3, R15(time=1.47),
+Job 18 obtains 2 cores (speed=90.25)and finishes at time 44.340155124653734:
+Block0: H3, C7, R19(time=1.07),
+Block1: H3, C6, R18(time=1.53),
+Block2: H3, C6, R19(time=0.61),
+Block3: H3, C7, R18(time=1.22),
+Job 19 obtains 2 cores (speed=46.55)and finishes at time 43.347499481304:
+Block0: H3, C9, R16(time=2.56),
+Block1: H3, C8, R13(time=2.94),
+Block2: H3, C9, R17(time=1.10),
+The maximum finish time: 44.891754385964916
+The total response time: 670.2141718953419
+Task2 Solution (Core Perspective) of Teaching Assistant:
+Host:0 finishes at time 44.28:
+Core 0 has 9 tasks and finishes at time 44.89
+        Job 10 Block 2, runTime 1.09 to 10.84
+        Job 10 Block 5, runTime 10.84 to 17.93
+        Job 10 Block 8, runTime 17.93 to 24.25
+        Job 10 Block 1, runTime 24.25 to 29.72
+        Job 10 Block 10, runTime 29.72 to 34.56
+        Job 10 Block 11, runTime 34.56 to 39.26
+        Job 16 Block 4, runTime 39.89 to 41.83
+        Job 16 Block 1, runTime 41.83 to 43.41
+        Job 16 Block 2, runTime 43.41 to 44.28
+Host:1 finishes at time 44.89:
+Core 1 has 9 tasks and finishes at time 44.89
+        Job 10 Block 3, runTime 1.08 to 9.36
+        Job 10 Block 0, runTime 9.36 to 16.87
+        Job 10 Block 7, runTime 16.87 to 23.25
+        Job 10 Block 6, runTime 23.25 to 28.80
+        Job 10 Block 4, runTime 28.80 to 34.13
+        Job 10 Block 9, runTime 34.13 to 38.90
+        Job 16 Block 3, runTime 39.97 to 41.71
+        Job 16 Block 5, runTime 41.71 to 43.42
+        Job 16 Block 0, runTime 43.42 to 44.89
+Core 2 has 17 tasks and finishes at time 43.48
+        Job 11 Block 1, runTime 1.12 to 7.31
+        Job 11 Block 2, runTime 7.31 to 11.99
+        Job 11 Block 0, runTime 11.99 to 16.03
+        Job 11 Block 3, runTime 16.03 to 19.23
+        Job 11 Block 4, runTime 19.23 to 22.05
+        Job 11 Block 9, runTime 22.05 to 24.79
+        Job 14 Block 6, runTime 25.54 to 28.37
+        Job 14 Block 1, runTime 28.37 to 30.25
+        Job 14 Block 0, runTime 30.25 to 31.55
+        Job 14 Block 5, runTime 31.55 to 32.71
+        Job 7 Block 3, runTime 33.76 to 35.51
+        Job 7 Block 0, runTime 35.51 to 36.80
+        Job 7 Block 1, runTime 36.80 to 37.88
+        Job 7 Block 5, runTime 37.88 to 38.84
+        Job 7 Block 6, runTime 38.84 to 39.68
+        Job 17 Block 0, runTime 40.14 to 41.90
+        Job 17 Block 1, runTime 41.90 to 42.81
+Host:2 finishes at time 44.06:
+Core 3 has 17 tasks and finishes at time 43.48
+        Job 11 Block 10, runTime 1.00 to 7.02
+        Job 11 Block 8, runTime 7.02 to 12.24
+        Job 11 Block 6, runTime 12.24 to 16.29
+        Job 11 Block 7, runTime 16.29 to 19.36
+        Job 11 Block 5, runTime 19.36 to 22.10
+        Job 14 Block 7, runTime 25.55 to 28.10
+        Job 14 Block 4, runTime 28.10 to 30.18
+        Job 14 Block 3, runTime 30.18 to 31.73
+        Job 14 Block 2, runTime 31.73 to 32.86
+        Job 7 Block 9, runTime 33.77 to 35.36
+        Job 7 Block 8, runTime 35.36 to 36.83
+        Job 7 Block 2, runTime 36.83 to 37.83
+        Job 7 Block 4, runTime 37.83 to 38.81
+        Job 7 Block 7, runTime 38.81 to 39.71
+        Job 17 Block 4, runTime 40.24 to 41.71
+        Job 17 Block 2, runTime 41.71 to 42.74
+        Job 17 Block 3, runTime 42.74 to 43.48
+Core 4 has 15 tasks and finishes at time 44.06
+        Job 0 Block 2, runTime 0.28 to 14.91
+        Job 3 Block 5, runTime 21.32 to 24.98
+        Job 3 Block 4, runTime 24.98 to 27.40
+        Job 3 Block 3, runTime 27.40 to 29.48
+        Job 6 Block 2, runTime 30.38 to 32.60
+        Job 6 Block 3, runTime 32.60 to 34.15
+        Job 6 Block 5, runTime 34.15 to 35.45
+        Job 6 Block 0, runTime 35.45 to 36.29
+        Job 6 Block 6, runTime 36.29 to 37.13
+        Job 9 Block 6, runTime 38.24 to 39.81
+        Job 9 Block 8, runTime 39.81 to 40.90
+        Job 9 Block 4, runTime 40.90 to 41.89
+        Job 9 Block 1, runTime 41.89 to 42.78
+        Job 9 Block 0, runTime 42.78 to 43.53
+        Job 9 Block 9, runTime 43.53 to 44.06
+Core 5 has 15 tasks and finishes at time 44.06
+        Job 0 Block 0, runTime 0.39 to 14.91
+        Job 0 Block 1, runTime 14.91 to 20.70
+        Job 3 Block 2, runTime 21.28 to 24.26
+        Job 3 Block 0, runTime 24.26 to 26.68
+        Job 3 Block 1, runTime 26.68 to 28.94
+        Job 6 Block 7, runTime 30.29 to 32.41
+        Job 6 Block 8, runTime 32.41 to 34.02
+        Job 6 Block 1, runTime 34.02 to 35.36
+        Job 6 Block 4, runTime 35.36 to 36.40
+        Job 9 Block 5, runTime 38.22 to 39.36
+        Job 9 Block 3, runTime 39.36 to 40.47
+        Job 9 Block 2, runTime 40.47 to 41.48
+        Job 9 Block 10, runTime 41.48 to 42.45
+        Job 9 Block 7, runTime 42.45 to 43.35
+        Job 9 Block 11, runTime 43.35 to 43.97
+Host:3 finishes at time 44.34:
+Core 6 has 19 tasks and finishes at time 44.34
+        Job 12 Block 0, runTime 0.97 to 5.43
+        Job 12 Block 8, runTime 5.43 to 8.79
+        Job 12 Block 5, runTime 8.79 to 11.98
+        Job 12 Block 9, runTime 11.98 to 13.88
+        Job 12 Block 3, runTime 13.88 to 15.62
+        Job 2 Block 2, runTime 16.83 to 21.49
+        Job 2 Block 1, runTime 21.49 to 24.48
+        Job 5 Block 3, runTime 27.43 to 30.03
+        Job 5 Block 2, runTime 30.03 to 31.82
+        Job 5 Block 0, runTime 31.82 to 33.31
+        Job 5 Block 7, runTime 33.31 to 34.48
+        Job 8 Block 5, runTime 35.53 to 37.23
+        Job 8 Block 2, runTime 37.23 to 38.70
+        Job 8 Block 10, runTime 38.70 to 39.59
+        Job 8 Block 9, runTime 39.59 to 40.42
+        Job 8 Block 1, runTime 40.42 to 41.05
+        Job 8 Block 4, runTime 41.05 to 41.63
+        Job 18 Block 1, runTime 42.02 to 43.55
+        Job 18 Block 2, runTime 43.55 to 44.16
+Core 7 has 19 tasks and finishes at time 44.34
+        Job 12 Block 7, runTime 1.02 to 4.96
+        Job 12 Block 1, runTime 4.96 to 8.84
+        Job 12 Block 2, runTime 8.84 to 11.94
+        Job 12 Block 6, runTime 11.94 to 14.65
+        Job 12 Block 4, runTime 14.65 to 16.39
+        Job 2 Block 4, runTime 16.94 to 21.12
+        Job 2 Block 0, runTime 21.12 to 24.14
+        Job 2 Block 3, runTime 24.14 to 26.63
+        Job 5 Block 5, runTime 27.43 to 29.83
+        Job 5 Block 1, runTime 29.83 to 31.97
+        Job 5 Block 6, runTime 31.97 to 33.23
+        Job 5 Block 4, runTime 33.23 to 34.44
+        Job 8 Block 6, runTime 35.45 to 37.02
+        Job 8 Block 3, runTime 37.02 to 38.55
+        Job 8 Block 7, runTime 38.55 to 39.77
+        Job 8 Block 0, runTime 39.77 to 40.48
+        Job 8 Block 8, runTime 40.48 to 41.11
+        Job 18 Block 3, runTime 42.05 to 43.27
+        Job 18 Block 0, runTime 43.27 to 44.34
+Core 8 has 13 tasks and finishes at time 43.35
+        Job 13 Block 2, runTime 0.99 to 4.36
+        Job 13 Block 7, runTime 4.36 to 7.15
+        Job 13 Block 5, runTime 7.15 to 9.46
+        Job 13 Block 0, runTime 9.46 to 11.08
+        Job 13 Block 4, runTime 11.08 to 12.62
+        Job 4 Block 3, runTime 13.37 to 16.46
+        Job 4 Block 1, runTime 16.46 to 18.89
+        Job 4 Block 0, runTime 18.89 to 21.26
+        Job 1 Block 3, runTime 23.41 to 30.20
+        Job 15 Block 1, runTime 32.57 to 34.84
+        Job 15 Block 6, runTime 34.84 to 36.62
+        Job 15 Block 4, runTime 36.62 to 38.01
+        Job 19 Block 1, runTime 39.63 to 42.57
+Core 9 has 17 tasks and finishes at time 43.35
+        Job 13 Block 3, runTime 0.88 to 4.11
+        Job 13 Block 1, runTime 4.11 to 7.19
+        Job 13 Block 6, runTime 7.19 to 9.30
+        Job 13 Block 8, runTime 9.30 to 11.15
+        Job 4 Block 2, runTime 13.53 to 16.23
+        Job 4 Block 4, runTime 16.23 to 18.78
+        Job 4 Block 6, runTime 18.78 to 21.20
+        Job 4 Block 5, runTime 21.20 to 23.15
+        Job 1 Block 1, runTime 23.47 to 26.47
+        Job 1 Block 2, runTime 26.47 to 29.21
+        Job 1 Block 0, runTime 29.21 to 31.90
+        Job 15 Block 2, runTime 32.72 to 34.76
+        Job 15 Block 0, runTime 34.76 to 36.76
+        Job 15 Block 3, runTime 36.76 to 38.14
+        Job 15 Block 5, runTime 38.14 to 39.36
+        Job 19 Block 0, runTime 39.70 to 42.25
+        Job 19 Block 2, runTime 42.25 to 43.35
+The maximum finish time: 44.891754385964916
+The total response time: 670.2141718953419
+Utilization rate: 0.9806617793753079
